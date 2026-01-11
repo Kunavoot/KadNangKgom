@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: false;
+}
+
+* {
+  /* setting css default */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  /* font */
+  font-family: "Noto Sans Thai Looped", sans-serif;
+  font-optical-sizing: auto;
+}
