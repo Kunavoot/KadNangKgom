@@ -10,36 +10,33 @@ function Home() {
           <Navbar />
         </nav>
 
-        <div className="w-80% h-10 bg-danger">
-          <h1>LoginPage</h1>
-        </div>
+        {/* login box */}
+        <div className="card flex flex-row bg-base-100 w-[50%] h-[50%] m-auto mt-16 shadow-[0px_0px_28.799999237060547px_0px_rgba(0,0,0,0.25)]">
+          <div className="flex-1 w-[45%] h-[80%] text-center justify-center m-auto">
+            <h3 className="card text-2xl text-left pl-7 mb-7">เข้าสู่ระบบ</h3>
+            <fieldset className="fieldset w-[80%] m-auto">
+              <label className="label">Username</label>
+              <input type="text" className="input px-3 w-[100%] focus:border-[#5bc06d]" placeholder="Username" />
 
-        <div className="card bg-base-100 w-96 shadow-sm">
-          <figure>
-            <img
-              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-              alt="Shoes"
-            />
-          </figure>
-          <div className="card-body">
-            <h2 className="card-title">Card Title</h2>
-            <p>
-              A card component has a figure, a body part, and inside body there
-              are title and actions parts
-            </p>
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Buy Now</button>
+              <label className="label">Password</label>
+              <input type="password" className="input px-3 w-[100%] focus:border-[#5bc06d]" placeholder="Password" />
+
+              <button className="btn w-[100%] mt-7 bg-[#72DF82] hover:bg-[#5bc06d]">ดำเนินการต่อ</button>
+            </fieldset>
+
+            <div className="mt-4 text-sm">
+              <label className="text-[#7D7D7D]">ต้องการเข้าร่วมกับเรา?</label>
+              <a href="#" className="text-[#5bc06d] hover:underline ml-2">สมัครสมาชิก</a>
             </div>
+
+          </div>
+          <div className="flex-1 w-[45%] justify-items-center content-center">
+            <img
+              className="h-[90%] text-center"
+              src="../../public/login_img.png"
+            />
           </div>
         </div>
-        <button className="btn btn-dash">Default</button>
-        <button className="btn btn-dash btn-primary">Primary</button>
-        <button className="btn btn-dash btn-secondary">Secondary</button>
-        <button className="btn btn-dash btn-accent">Accent</button>
-        <button className="btn btn-dash btn-info">Info</button>
-        <button className="btn btn-dash btn-success">Success</button>
-        <button className="btn btn-dash btn-warning">Warning</button>
-        <button className="btn btn-dash btn-error">Error</button>
       </div>
     </>
   );

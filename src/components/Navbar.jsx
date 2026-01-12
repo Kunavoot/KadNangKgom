@@ -15,7 +15,7 @@ function Navbar() {
         </div>
 
         <div className="navbar-end">
-          <ul className="menu menu-horizontal px-1 text-2xl">
+          <ul className="menu menu-horizontal text-2xl gap-8" style={{marginRight: ['2rem']}}>
             <li>
               <a href="#" className="text-[#CFCFCF]">
                 สมัครสมาชิก
@@ -32,18 +32,18 @@ function Navbar() {
 
       {/* Menu */}
       <div className="bg-[#EDEDED] w-full h-1/3 content-center text-center ">
-        <ul className="menu menu-horizontal bg-base-200 rounded-box text-xl">
-          <li className="px-3">
-            <a href="#">หน้าแรก</a>
+        <ul className="menu menu-horizontal rounded-box text-xl gap-8">
+          <li>
+            <a className="hover:font-bold" href="#">หน้าแรก</a>
           </li>
           <li>
-            <a href="#">แผนผัง</a>
+            <a className="hover:font-bold" href="#">แผนผัง</a>
           </li>
           <li>
-            <a href="#">เกี่ยวกับเรา</a>
+            <a className="hover:font-bold" href="#">เกี่ยวกับเรา</a>
           </li>
           <li>
-            <a href="#">ติดต่อเรา</a>
+            <a className="hover:font-bold" href="#">ติดต่อเรา</a>
           </li>
         </ul>
       </div>
