@@ -4,7 +4,7 @@
   themes: light --default;
 }
 
-input {
+input, select {
   outline: none !important;
 }
 

@@ -1,8 +1,21 @@
 import React from "react";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { useAuth } from "../service/AuthContext.jsx";
 
 function Home() {
+  const { login } = useAuth();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // ตัวอย่างข้อมูลผู้ใช้
+    const userData = {
+      username: "Kunavoot",
+      email: "kunavoot@mail.com",
+    };
+
+    login(userData);
+  };
+
   return (
     <>
       <div className="w-screen h-screen">
@@ -16,19 +29,30 @@ function Home() {
             <h3 className="card text-2xl text-left pl-7 mb-7">เข้าสู่ระบบ</h3>
             <fieldset className="fieldset w-[80%] m-auto">
               <label className="label">Username</label>
-              <input type="text" className="input px-3 w-[100%] focus:border-[#5bc06d]" placeholder="Username" />
+              <input
+                type="text"
+                className="input px-3 w-full focus:border-[#5bc06d]"
+                placeholder="Username"
+              />
 
               <label className="label">Password</label>
-              <input type="password" className="input px-3 w-[100%] focus:border-[#5bc06d]" placeholder="Password" />
+              <input
+                type="password"
+                className="input px-3 w-full focus:border-[#5bc06d]"
+                placeholder="Password"
+              />
 
-              <button className="btn w-[100%] mt-7 bg-[#72DF82] hover:bg-[#5bc06d]">ดำเนินการต่อ</button>
+              <button className="btn w-full mt-7 bg-[#72DF82] hover:bg-[#5bc06d]" onClick={(e) =>handleLogin(e)}>
+                ดำเนินการต่อ
+              </button>
             </fieldset>
 
             <div className="mt-4 text-sm">
               <label className="text-[#7D7D7D]">ต้องการเข้าร่วมกับเรา?</label>
-              <a href="#" className="text-[#5bc06d] hover:underline ml-2">สมัครสมาชิก</a>
+              <a href="#" className="text-[#5bc06d] hover:underline ml-2">
+                สมัครสมาชิก
+              </a>
             </div>
-
           </div>
           <div className="flex-1 w-[45%] justify-items-center content-center">
             <img
