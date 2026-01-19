@@ -18,7 +18,7 @@ function Home() {
 
   return (
     <>
-      <div className="w-screen h-screen">
+      <div className="min-w-screen min-h-screen">
         <nav className="h-[18%]">
           <Navbar />
         </nav>

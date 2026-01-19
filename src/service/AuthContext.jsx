@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext } from 'react';
 
 // 1. สร้าง Context
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 // 2. สร้าง Provider Component
 export const AuthProvider = ({ children }) => {
@@ -26,4 +26,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 // 3. สร้าง Custom Hook เพื่อเรียกใช้ง่ายๆ
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

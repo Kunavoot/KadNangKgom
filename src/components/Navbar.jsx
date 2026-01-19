@@ -1,14 +1,15 @@
-import { React, use, useEffect } from "react";
+import { React, useEffect } from "react";
 import { useAuth } from "../service/AuthContext.jsx";
 
 function Navbar() {
   const { isLoggedIn, user, logout } = useAuth();
   console.log("Navbar - isLoggedIn:", isLoggedIn);
   console.log("Navbar - user:", user);
+  
   useEffect(() => {
     console.log("Navbar - isLoggedIn changed:", isLoggedIn);
     console.log("Navbar - user changed:", user);
-  }, [isLoggedIn]);
+  }, [isLoggedIn, user]);
 
   return (
     <>

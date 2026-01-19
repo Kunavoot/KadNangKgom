@@ -4,7 +4,8 @@
   themes: light --default;
 }
 
-input, select {
+input,
+select {
   outline: none !important;
 }
 
@@ -12,4 +13,10 @@ input, select {
   /* font */
   font-family: "Noto Sans Thai Looped", sans-serif;
   font-optical-sizing: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
