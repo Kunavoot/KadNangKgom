@@ -1,6 +1,6 @@
 import { React, useState } from "react";
-import SidemenuAdmin from "../../components/Admin/SidemenuAdmin";
 import Navbar from "../../components/Navbar";
+import ManageAdmin from "../../components/Admin/ManageAdmin";
 
 function AdminPage() {
   const [isPage, setIsPage] = useState("");
@@ -14,20 +14,25 @@ function AdminPage() {
         <div className="flex-1 overflow-hidden">
           <div className="drawer md:drawer-open h-full">
             <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content flex flex-col items-center justify-center h-full w-full p-4">
+            <div className="drawer-content h-full w-full p-4">
               {/* Page content here */}
-              <label
+              {/* <label
                 htmlFor="my-drawer-3"
                 className="btn drawer-button lg:hidden"
               >
                 Open drawer
-              </label>
+              </label> */}
               {isPage === "" && (
-                <div className="text-4xl font-bold text-gray-400 text-center">
-                  ยินดีต้อนรับเข้าสู่ระบบ Admin
+                <div className="h-full flex justify-center items-center">
+                  <div className="text-4xl font-bold text-gray-400 text-center">
+                    ยินดีต้อนรับเข้าสู่ระบบ Admin
+                  </div>
                 </div>
               )}
+              {isPage === "manageAdmin" && <ManageAdmin />}
             </div>
+
+            {/* Drawer Side */}
             <div className="drawer-side h-full z-20">
               <label
                 htmlFor="my-drawer-3"
@@ -35,7 +40,6 @@ function AdminPage() {
                 className="drawer-overlay"
               ></label>
 
-              {/* ปรับ padding รอบๆ เหลือ p-4 */}
               <ul className="menu bg-base-200 min-h-full w-72 p-4 flex flex-col justify-between text-base-content no-scrollbar overflow-y-auto">
                 <div>
                   {/* Header: Admin - ลดขนาดลง เหลือ 2xl และลด margin-bottom */}
@@ -49,7 +53,7 @@ function AdminPage() {
                   </li>
                   {/* รายการเมนู - ใช้ขนาดมาตรฐาน (ไม่ต้องใส่ class text-...) */}
                   <li>
-                    <a>ผู้บริหาร</a>
+                    <a className={isPage === "manageAdmin" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageAdmin")}>ผู้บริหาร</a>
                   </li>
                   <li>
                     <a>ผู้ค้า</a>

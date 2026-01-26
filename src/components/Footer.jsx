@@ -3,7 +3,7 @@ import React from "react";
 function Footer() {
   return (
     <>
-      <footer className="footer footer-horizontal bg-linear-to-l from-[#A9F481] to-[#00AF35] text-neutral-content p-2 text-white ">
+      <footer className="footer footer-horizontal bg-linear-to-l from-[#A9F481] to-[#00AF35] p-2 text-white ">
         
         <aside className="flex items-center gap-10">
           <img src="/logo.jpg" alt="logo" className="w-35 rounded-full" />
