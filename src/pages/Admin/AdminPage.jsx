@@ -2,6 +2,7 @@ import { React, useState } from "react";
 import Navbar from "../../components/Navbar";
 import ManageAdmin from "../../components/Admin/ManageAdmin";
 import ManageTrader from "../../components/Admin/ManageTrader";  
+import ManageGroup from "../../components/Admin/manageGroup";
 import Loading from "../../components/Loading";
 
 function AdminPage() {
@@ -32,6 +33,7 @@ function AdminPage() {
               )}
               {isPage === "manageAdmin" && <ManageAdmin />}
               {isPage === "manageTrader" && <ManageTrader />}
+              {isPage === "manageGroup" && <ManageGroup />}
             </div>
 
             {/* Drawer Side */}
@@ -61,7 +63,7 @@ function AdminPage() {
                     <a className={isPage === "manageTrader" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageTrader")}>ผู้ค้า</a>
                   </li>
                   <li>
-                    <a>กลุ่มสังกัด</a>
+                    <a className={isPage === "manageGroup" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageGroup")}>กลุ่มสังกัด</a>
                   </li>
                   <li>
                     <a>ประเภทสมาชิก</a>
