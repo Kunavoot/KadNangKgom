@@ -1,6 +1,8 @@
 import { React, useState } from "react";
 import Navbar from "../../components/Navbar";
 import ManageAdmin from "../../components/Admin/ManageAdmin";
+import ManageTrader from "../../components/Admin/ManageTrader";  
+import Loading from "../../components/Loading";
 
 function AdminPage() {
   const [isPage, setIsPage] = useState("");
@@ -10,7 +12,6 @@ function AdminPage() {
         <div className="h-[18%] shrink-0">
           <Navbar />
         </div>
-
         <div className="flex-1 overflow-hidden">
           <div className="drawer md:drawer-open h-full">
             <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
@@ -30,6 +31,7 @@ function AdminPage() {
                 </div>
               )}
               {isPage === "manageAdmin" && <ManageAdmin />}
+              {isPage === "manageTrader" && <ManageTrader />}
             </div>
 
             {/* Drawer Side */}
@@ -56,7 +58,7 @@ function AdminPage() {
                     <a className={isPage === "manageAdmin" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageAdmin")}>ผู้บริหาร</a>
                   </li>
                   <li>
-                    <a>ผู้ค้า</a>
+                    <a className={isPage === "manageTrader" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageTrader")}>ผู้ค้า</a>
                   </li>
                   <li>
                     <a>กลุ่มสังกัด</a>
