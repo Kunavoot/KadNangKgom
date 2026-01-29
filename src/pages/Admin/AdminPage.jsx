@@ -1,19 +1,22 @@
 import { React, useState } from "react";
 import Navbar from "../../components/Navbar";
 import ManageAdmin from "../../components/Admin/ManageAdmin";
-import ManageTrader from "../../components/Admin/ManageTrader";  
+import ManageTrader from "../../components/Admin/ManageTrader";
 import ManageGroup from "../../components/Admin/manageGroup";
-import Loading from "../../components/Loading";
+import ManageMemberType from "../../components/Admin/ManageMemberType";
+import ManageMarket from "../../components/Admin/ManageMarket";
+import ManageProductType from "../../components/Admin/ManageProductType";
+import ManageAgreement from "../../components/Admin/ManageAgreement";
 
 function AdminPage() {
   const [isPage, setIsPage] = useState("");
   return (
     <>
-      <div className="w-screen h-screen flex flex-col overflow-hidden">
+      <div className="w-screen h-screen flex flex-col">
         <div className="h-[18%] shrink-0">
           <Navbar />
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1">
           <div className="drawer md:drawer-open h-full">
             <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
             <div className="drawer-content h-full w-full p-4">
@@ -34,6 +37,10 @@ function AdminPage() {
               {isPage === "manageAdmin" && <ManageAdmin />}
               {isPage === "manageTrader" && <ManageTrader />}
               {isPage === "manageGroup" && <ManageGroup />}
+              {isPage === "manageMemberType" && <ManageMemberType />}
+              {isPage === "manageMarket" && <ManageMarket />}
+              {isPage === "manageProductType" && <ManageProductType />}
+              {isPage === "manageAgreement" && <ManageAgreement />}
             </div>
 
             {/* Drawer Side */}
@@ -57,19 +64,50 @@ function AdminPage() {
                   </li>
                   {/* รายการเมนู - ใช้ขนาดมาตรฐาน (ไม่ต้องใส่ class text-...) */}
                   <li>
-                    <a className={isPage === "manageAdmin" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageAdmin")}>ผู้บริหาร</a>
+                    <a
+                      className={isPage === "manageAdmin" ? "bg-[#71FF7A]" : ""}
+                      onClick={() => setIsPage("manageAdmin")}
+                    >
+                      ผู้บริหาร
+                    </a>
                   </li>
                   <li>
-                    <a className={isPage === "manageTrader" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageTrader")}>ผู้ค้า</a>
+                    <a
+                      className={
+                        isPage === "manageTrader" ? "bg-[#71FF7A]" : ""
+                      }
+                      onClick={() => setIsPage("manageTrader")}
+                    >
+                      ผู้ค้า
+                    </a>
                   </li>
                   <li>
-                    <a className={isPage === "manageGroup" ? "bg-[#71FF7A]" : ""} onClick={() => setIsPage("manageGroup")}>กลุ่มสังกัด</a>
+                    <a
+                      className={isPage === "manageGroup" ? "bg-[#71FF7A]" : ""}
+                      onClick={() => setIsPage("manageGroup")}
+                    >
+                      กลุ่มสังกัด
+                    </a>
                   </li>
                   <li>
-                    <a>ประเภทสมาชิก</a>
+                    <a
+                      className={
+                        isPage === "manageMemberType" ? "bg-[#71FF7A]" : ""
+                      }
+                      onClick={() => setIsPage("manageMemberType")}
+                    >
+                      ประเภทสมาชิก
+                    </a>
                   </li>
                   <li>
-                    <a>ประเภทสินค้า</a>
+                    <a
+                      className={
+                        isPage === "manageProductType" ? "bg-[#71FF7A]" : ""
+                      }
+                      onClick={() => setIsPage("manageProductType")}
+                    >
+                      ประเภทสินค้า
+                    </a>
                   </li>
 
                   {/* กลุ่มที่ 2 - ลดระยะห่างด้านบน (mt) */}
@@ -77,10 +115,24 @@ function AdminPage() {
                     จัดการพื้นที่ตลาด
                   </li>
                   <li>
-                    <a>เตรียมพื้นที่ตลาด</a>
+                    <a
+                      className={
+                        isPage === "manageMarket" ? "bg-[#71FF7A]" : ""
+                      }
+                      onClick={() => setIsPage("manageMarket")}
+                    >
+                      เตรียมพื้นที่ตลาด
+                    </a>
                   </li>
                   <li>
-                    <a>สัญญาเช่า</a>
+                    <a
+                      className={
+                        isPage === "manageAgreement" ? "bg-[#71FF7A]" : ""
+                      }
+                      onClick={() => setIsPage("manageAgreement")}
+                    >
+                      สัญญาเช่า
+                    </a>
                   </li>
 
                   {/* กลุ่มที่ 3 */}
@@ -93,16 +145,16 @@ function AdminPage() {
                   <li>
                     <a>พื้นที่ตลาด</a>
                   </li>
-                </div>
-
-                {/* ส่วนปุ่มออกจากระบบ - ลดขนาดความสูงและตัวหนังสือ */}
-                <div className="mt-6 mb-2">
-                  <button
-                    onClick={() => console.log("Logout clicked")}
-                    className="btn btn-error w-full text-white text-lg min-h-12 rounded-xl bg-[#ff7675] border-none hover:bg-[#fab1a0] font-bold"
-                  >
-                    ออกจากระบบ
-                  </button>
+                  
+                  {/* ส่วนปุ่มออกจากระบบ */}
+                  <div className="mt-6 mb-2">
+                    <button
+                      onClick={() => console.log("Logout clicked")}
+                      className="btn btn-error w-full text-white text-lg min-h-12 rounded-xl bg-[#ff7675] border-none hover:bg-[#fab1a0] font-bold"
+                    >
+                      ออกจากระบบ
+                    </button>
+                  </div>
                 </div>
               </ul>
             </div>

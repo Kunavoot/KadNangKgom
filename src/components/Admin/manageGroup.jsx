@@ -1,23 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Loading from "../Loading";
 
 function ManageGroup() {
   // จัดการหน้าเว็บ
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isForm, setIsFrom] = React.useState(false);
-  const [formType, setFormType] = React.useState(""); // Add, Edit สำหรับจัดการฟอร์ม
+  const [isLoading, setIsLoading] = useState(false);
+  const [isForm, setIsFrom] = useState(false);
+  const [formType, setFormType] = useState(""); // Add, Edit สำหรับจัดการฟอร์ม
 
   // ข้อมูล
-  const [details, setDetails] = React.useState([]);
-  const [selectedItem, setSelectedItem] = React.useState(null);
-  const [formData, setFormData] = React.useState({
+  const [details, setDetails] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({
     id: "",
     name: "",
     remark: "",
   });
 
   const handleEdit = (item) => {
-    // Logic สำหรับแก้ไขข้อมูลกลุ่มสังกัด
     setFormType("edit");
     setIsFrom(true);
     setSelectedItem(item);
@@ -73,15 +72,15 @@ function ManageGroup() {
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      console.error("Error fetching trader data:", error);
+      console.error("Error fetching group data:", error);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getGroup();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (formType === "edit" && selectedItem) {
       setFormData({
         id: selectedItem.id || "",
@@ -111,7 +110,7 @@ function ManageGroup() {
               className="btn bg-[#7BE397] border-[#7BE397] shadow-sm hover:bg-[#68d284] hover:border-[#68d284]"
               onClick={handleAdd}
             >
-              เพิ่มกลุ่มสังกัด
+              เพิ่มข้อมูล
             </button>
           </div>
 
@@ -123,7 +122,7 @@ function ManageGroup() {
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัส</th>
-                  <th className="text-start">ชื่อกลุ่มสังกัด</th>
+                  <th className="text-start w-[20%]">ชื่อกลุ่มสังกัด</th>
                   <th className="text-start">รายละเอียด</th>
                   <th className="text-center w-[20%]">ดำเนินการ</th>
                 </tr>
@@ -163,71 +162,75 @@ function ManageGroup() {
           </div>
         </>
       ) : (
-        <>
-          {/* Form เพิ่มข้อมูลกลุ่มสังกัด หรือแก้ไขกลุ่มสังกัด */}
-          <div className="flex items-center gap-3 py-4">
-            <button
-              className="btn btn-sm btn-circle btn-ghost text-2xl content-center"
-              onClick={handleBackToList}
-            >
-              &lt;
-            </button>
-            <div className="text-xl font-bold">
+        <div className="border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-[#8EEA8B] px-6 py-4 flex items-center justify-between">
+            <div className="text-3xl font-bold text-green-800">
               {formType === "edit" ? "แก้ไขกลุ่มสังกัด" : "เพิ่มกลุ่มสังกัด"}
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">
-                <span className="label-text">รหัส</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                name="id"
-                value={formData.id}
-                onChange={handleFormChange}
-                placeholder="กรอกรหัส"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">ชื่อกลุ่มสังกัด</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                name="name"
-                value={formData.name}
-                onChange={handleFormChange}
-                placeholder="กรอกชื่อกลุ่มสังกัด"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">รายละเอียด</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                name="remark"
-                value={formData.remark}
-                onChange={handleFormChange}
-                placeholder="กรอกรายละเอียด"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-6">
-            <button className="btn" onClick={handleBackToList}>
-              ยกเลิก
-            </button>
             <button
-              className="btn bg-[#7BE397] border-[#7BE397] shadow-sm hover:bg-[#68d284] hover:border-[#68d284]"
-              onClick={handleSave}
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
+              onClick={handleBackToList}
             >
-              บันทึก
+              ×
             </button>
           </div>
-        </>
+
+          <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">รหัส</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="id"
+                  value={formData.id}
+                  onChange={handleFormChange}
+                  placeholder="กรอกรหัส"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ชื่อกลุ่มสังกัด</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  placeholder="กรอกชื่อกลุ่มสังกัด"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">รายละเอียด</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="remark"
+                  value={formData.remark}
+                  onChange={handleFormChange}
+                  placeholder="กรอกรายละเอียด"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-6 pt-10">
+              <button
+                className="btn bg-[#ff7d7d] border-[#ff7d7d] text-white shadow-sm hover:bg-[#ff6b6b] hover:border-[#ff6b6b]"
+                onClick={handleBackToList}
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                className="btn bg-[#77e279] border-[#77e279] text-white shadow-sm hover:bg-[#68d56b] hover:border-[#68d56b]"
+                onClick={handleSave}
+              >
+                บันทึก
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

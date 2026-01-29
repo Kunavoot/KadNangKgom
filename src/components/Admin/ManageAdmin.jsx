@@ -1,16 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Loading from "../Loading";
 
 function ManageAdmin() {
   // จัดการหน้าเว็บ
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isForm, setIsFrom] = React.useState(false);
-  const [formType, setFormType] = React.useState(""); // Add, Edit สำหรับจัดการฟอร์ม
+  const [isLoading, setIsLoading] = useState(false);
+  const [isForm, setIsFrom] = useState(false);
+  const [formType, setFormType] = useState(""); // Add, Edit สำหรับจัดการฟอร์ม
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   // ข้อมูล
-  const [details, setDetails] = React.useState([]);
-  const [selectedItem, setSelectedItem] = React.useState(null);
-  const [formData, setFormData] = React.useState({
+  const [details, setDetails] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [formData, setFormData] = useState({
     id: "",
     name: "",
     username: "",
@@ -47,7 +48,9 @@ function ManageAdmin() {
       setDetails((prev) => [...prev, { ...formData }]);
     } else if (formType === "edit" && selectedItem) {
       setDetails((prev) =>
-        prev.map((item) => (item.id === selectedItem.id ? { ...item, ...formData } : item))
+        prev.map((item) =>
+          item.id === selectedItem.id ? { ...item, ...formData } : item,
+        ),
       );
     }
     handleBackToList();
@@ -70,13 +73,13 @@ function ManageAdmin() {
     ]);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsLoading(true);
     getAdmin();
     setIsLoading(false);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (formType === "edit" && selectedItem) {
       setFormData({
         id: selectedItem.id || "",
@@ -93,7 +96,7 @@ function ManageAdmin() {
 
   return (
     <>
-    {isLoading && <Loading />}
+      {isLoading && <Loading />}
       {!isForm ? (
         <>
           {/* Header */}
@@ -103,7 +106,7 @@ function ManageAdmin() {
               className="btn bg-[#7BE397] border-[#7BE397] shadow-sm hover:bg-[#68d284] hover:border-[#68d284]"
               onClick={handleAdd}
             >
-              เพิ่มผู้บริหาร
+              เพิ่มข้อมูล
             </button>
           </div>
 
@@ -132,7 +135,10 @@ function ManageAdmin() {
                       <td className="text-start">{item.username}</td>
                       <td className="text-start">{item.password}</td>
                       <td className="text-center">
-                        <button className="btn btn-sm btn-warning mr-2 w-17" onClick={() => handleEdit(item)}>
+                        <button
+                          className="btn btn-sm btn-warning mr-2 w-17"
+                          onClick={() => handleEdit(item)}
+                        >
                           แก้ไข
                         </button>
                         <button className="btn btn-sm btn-error w-17">
@@ -154,79 +160,111 @@ function ManageAdmin() {
           </div>
         </>
       ) : (
-        <>
-          {/* Form เพิ่มข้อมูลผู้บริหาร หรือแก้ไขผู้บริหาร */}
-          <div className="flex items-center gap-3 py-4">
-            {/* <button className="btn btn-sm" onClick={handleBackToList}>
-              กลับไปหน้ารายการ
-            </button> */}
-            <button className="btn btn-sm btn-circle btn-ghost text-2xl content-center" onClick={handleBackToList}>&lt;</button>
-            <div className="text-xl font-bold">
+        <div className="border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-[#8EEA8B] px-6 py-4 flex items-center justify-between">
+            <div className="text-3xl font-bold text-green-800">
               {formType === "edit" ? "แก้ไขผู้บริหาร" : "เพิ่มผู้บริหาร"}
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="label">
-                <span className="label-text">รหัส</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                name="id"
-                value={formData.id}
-                onChange={handleFormChange}
-                placeholder="กรอกรหัส"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">ชื่อ-นามสกุล</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                name="name"
-                value={formData.name}
-                onChange={handleFormChange}
-                placeholder="กรอกชื่อ-นามสกุล"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">ชื่อผู้ใช้</span>
-              </label>
-              <input
-                className="input input-bordered w-full"
-                name="username"
-                value={formData.username}
-                onChange={handleFormChange}
-                placeholder="กรอกชื่อผู้ใช้"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">รหัสผ่าน</span>
-              </label>
-              <input
-                type="password"
-                className="input input-bordered w-full"
-                name="password"
-                value={formData.password}
-                onChange={handleFormChange}
-                placeholder="กรอกรหัสผ่าน"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-6">
-            <button className="btn" onClick={handleBackToList}>
-              ยกเลิก
-            </button>
-            <button className="btn bg-[#7BE397] border-[#7BE397] shadow-sm hover:bg-[#68d284] hover:border-[#68d284]" onClick={handleSave}>
-              บันทึก
+            <button
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
+              onClick={handleBackToList}
+            >
+              ×
             </button>
           </div>
-        </>
+
+          <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">รหัส</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="id"
+                  value={formData.id}
+                  onChange={handleFormChange}
+                  placeholder="กรอกรหัส"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ชื่อ-นามสกุล</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  placeholder="กรอกชื่อ-นามสกุล"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ชื่อผู้ใช้</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleFormChange}
+                  placeholder="กรอกชื่อผู้ใช้"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">รหัสผ่าน</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={isPasswordVisible ? "text" : "password"}
+                    className="input input-bordered w-full pr-10"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleFormChange}
+                    placeholder="กรอกรหัสผ่าน"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs"
+                    aria-label="แสดงรหัสผ่าน"
+                    onMouseDown={() => setIsPasswordVisible(true)}
+                    onMouseUp={() => setIsPasswordVisible(false)}
+                    onMouseLeave={() => setIsPasswordVisible(false)}
+                    onTouchStart={() => setIsPasswordVisible(true)}
+                    onTouchEnd={() => setIsPasswordVisible(false)}
+                    onTouchCancel={() => setIsPasswordVisible(false)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-4 w-4"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 5c-5.5 0-9.6 3.7-11 7 1.4 3.3 5.5 7 11 7s9.6-3.7 11-7c-1.4-3.3-5.5-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-6 pt-10">
+              <button
+                className="btn bg-[#ff7d7d] border-[#ff7d7d] text-white shadow-sm hover:bg-[#ff6b6b] hover:border-[#ff6b6b]"
+                onClick={handleBackToList}
+              >
+                ย้อนกลับ
+              </button>
+              <button
+                className="btn bg-[#77e279] border-[#77e279] text-white shadow-sm hover:bg-[#68d56b] hover:border-[#68d56b]"
+                onClick={handleSave}
+              >
+                บันทึก
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loading from "../Loading";
 
-function ManageTrader() {
+function ManageMemberType() {
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [isForm, setIsFrom] = useState(false);
@@ -9,36 +9,17 @@ function ManageTrader() {
 
   // ข้อมูล
   const [details, setDetails] = useState([]);
-  const [typeMembers, setTypeMembers] = useState([
-    {
-      "01": "สมาชิกทั่วไป",
-      "02": "สมาชิกพิเศษ",
-      "03": "สมาชิก VIP",
-    },
-  ]);
-  const [typeProducts, setTypeProducts] = useState([
-    {
-      "01": "สินค้าทั่วไป",
-      "02": "สินค้าพิเศษ",
-      "03": "สินค้า Premium",
-    },
-  ]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
     id: "",
     name: "",
-    shop: "",
-    type_member: "",
-    type_product: "",
-    username: "",
-    password: "",
+    remark: "",
   });
 
   const handleEdit = (item) => {
     setFormType("edit");
     setIsFrom(true);
     setSelectedItem(item);
-    console.log("Editing id:", item);
   };
 
   const handleAdd = () => {
@@ -71,65 +52,35 @@ function ManageTrader() {
     handleBackToList();
   };
 
-  const getTrader = () => {
+  const getProductType = () => {
     setIsLoading(true);
     try {
-      // ดึงข้อมูลผู้ค้าจาก API หรือฐานข้อมูล
       setDetails([
         {
-          id: "90000000001",
-          name: "นาย xxxxxx xxxxxx",
-          shop: "ร้าน xxxxxx",
-          type_member: "สมาชิกทั่วไป",
-          type_product: "สินค้าทั่วไป",
-          username: "admin01",
-          password: "123456",
+          id: "01",
+          name: "อาหาร",
+          remark: "ขายอาหาร",
         },
         {
-          id: "90000000002",
-          name: "นางสาว yyyyyy yyyyyy",
-          shop: "ร้าน yyyyyy",
-          type_member: "สมาชิกพิเศษ",
-          type_product: "สินค้าพิเศษ",
-          username: "admin02",
-          password: "abcdef",
+          id: "02",
+          name: "เสื้อผ้า",
+          remark: "ขายเสื้อผ้า",
+        },
+        {
+          id: "03",
+          name: "เครื่องดื่ม",
+          remark: "ขายเครื่องดื่ม",
         },
       ]);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      console.error("Error fetching trader data:", error);
-    }
-  };
-
-  const getTypeMembers = () => {
-    // ดึงข้อมูลประเภทสมาชิกจาก API หรือฐานข้อมูล
-    setIsLoading(true);
-    try {
-      setTypeMembers(["สมาชิกทั่วไป", "สมาชิกพิเศษ", "สมาชิก VIP"]);
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      console.error("Error fetching type members:", error);
-    }
-  };
-
-  const getTypeProducts = () => {
-    // ดึงข้อมูลประเภทสินค้าจาก API หรือฐานข้อมูล
-    setIsLoading(true);
-    try {
-      setTypeProducts(["สินค้าทั่วไป", "สินค้าพิเศษ", "สินค้า Premium"]);
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      console.error("Error fetching type products:", error);
+      console.error("Error fetching product type data:", error);
     }
   };
 
   useEffect(() => {
-    getTrader();
-    getTypeMembers();
-    getTypeProducts();
+    getProductType();
   }, []);
 
   useEffect(() => {
@@ -137,11 +88,7 @@ function ManageTrader() {
       setFormData({
         id: selectedItem.id || "",
         name: selectedItem.name || "",
-        shop: selectedItem.shop || "",
-        type_member: selectedItem.type_member || "",
-        type_product: selectedItem.type_product || "",
-        username: selectedItem.username || "",
-        password: selectedItem.password || "",
+        remark: selectedItem.remark || "",
       });
       return;
     }
@@ -149,11 +96,7 @@ function ManageTrader() {
       setFormData({
         id: "",
         name: "",
-        shop: "",
-        type_member: "",
-        type_product: "",
-        username: "",
-        password: "",
+        remark: "",
       });
     }
   }, [formType, selectedItem]);
@@ -165,7 +108,7 @@ function ManageTrader() {
         <>
           {/* Header */}
           <div className="flex flex-row justify-between py-4">
-            <div className="text-2xl font-bold">จัดการข้อมูลผู้ค้า</div>
+            <div className="text-2xl font-bold">จัดการข้อมูลประเภทสินค้า</div>
             <button
               className="btn bg-[#7BE397] border-[#7BE397] shadow-sm hover:bg-[#68d284] hover:border-[#68d284]"
               onClick={handleAdd}
@@ -182,12 +125,8 @@ function ManageTrader() {
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัส</th>
-                  <th className="text-start">ชื่อร้าน</th>
-                  <th className="text-start">ชื่อ-นามสกุล</th>
-                  <th className="text-start">ประเภทสมาชิก</th>
-                  <th className="text-start">ประเภทสินค้า</th>
-                  <th className="text-start w-[10%]">ชื่อผู้ใช้</th>
-                  <th className="text-start w-[10%]">รหัสผ่าน</th>
+                  <th className="text-start w-[20%]">ชื่อประเภทสินค้า</th>
+                  <th className="text-start">รายละเอียด</th>
                   <th className="text-center w-[20%]">ดำเนินการ</th>
                 </tr>
               </thead>
@@ -198,12 +137,8 @@ function ManageTrader() {
                     <tr key={item.id || index} className="hover:bg-gray-100">
                       <th className="text-center">{index + 1}</th>
                       <td className="text-center">{item.id}</td>
-                      <td className="text-start">{item.shop}</td>
                       <td className="text-start">{item.name}</td>
-                      <td className="text-start">{item.type_member}</td>
-                      <td className="text-start">{item.type_product}</td>
-                      <td className="text-start">{item.username}</td>
-                      <td className="text-start">{item.password}</td>
+                      <td className="text-start">{item.remark}</td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-warning mr-2 w-17"
@@ -233,7 +168,7 @@ function ManageTrader() {
         <div className="border border-gray-200 rounded-lg shadow-lg overflow-hidden">
           <div className="bg-[#8EEA8B] px-6 py-4 flex items-center justify-between">
             <div className="text-3xl font-bold text-green-800">
-              {formType === "edit" ? "แก้ไขผู้ค้า" : "เพิ่มผู้ค้า"}
+              {formType === "edit" ? "แก้ไขประเภทสมาชิก" : "เพิ่มประเภทสมาชิก"}
             </div>
             <button
               className="text-4xl font-bold text-gray-500 hover:text-gray-700"
@@ -259,63 +194,27 @@ function ManageTrader() {
               </div>
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">ชื่อ-นามสกุล</span>
+                  <span className="label-text text-lg">ประเภทสมาชิก</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
                   name="name"
                   value={formData.name}
                   onChange={handleFormChange}
-                  placeholder="กรอกชื่อ-นามสกุล"
+                  placeholder="กรอกประเภทสมาชิก"
                 />
               </div>
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">ชื่อร้าน</span>
+                  <span className="label-text text-lg">รายละเอียด</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="shop"
-                  value={formData.shop}
+                  name="remark"
+                  value={formData.remark}
                   onChange={handleFormChange}
-                  placeholder="กรอกชื่อร้าน"
+                  placeholder="กรอกรายละเอียด"
                 />
-              </div>
-              <div>
-                <label className="label">
-                  <span className="label-text text-lg">ประเภทสมาชิก</span>
-                </label>
-                <select
-                  className="select select-bordered w-full"
-                  name="type_member"
-                  value={formData.type_member}
-                  onChange={handleFormChange}
-                >
-                  <option value="" disabled>
-                    เลือกประเภทสมาชิก
-                  </option>
-                  <option value="01">สมาชิกทั่วไป</option>
-                  <option value="02">สมาชิกพิเศษ</option>
-                  <option value="03">สมาชิก VIP</option>
-                </select>
-              </div>
-              <div>
-                <label className="label">
-                  <span className="label-text text-lg">ประเภทสินค้า</span>
-                </label>
-                <select
-                  className="select select-bordered w-full"
-                  name="type_product"
-                  value={formData.type_product}
-                  onChange={handleFormChange}
-                >
-                  <option value="" disabled>
-                    เลือกประเภทสินค้า
-                  </option>
-                  <option value="01">สินค้าทั่วไป</option>
-                  <option value="02">สินค้าพิเศษ</option>
-                  <option value="03">สินค้า Premium</option>
-                </select>
               </div>
             </div>
 
@@ -340,4 +239,4 @@ function ManageTrader() {
   );
 }
 
-export default ManageTrader;
+export default ManageMemberType;
