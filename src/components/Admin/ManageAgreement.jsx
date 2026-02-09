@@ -1,4 +1,9 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { forwardRef, useMemo, useRef, useState } from "react";
+import dayjs from "dayjs";
+import buddhistEra from "dayjs/plugin/buddhistEra";
+import "dayjs/locale/th";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Loading from "../Loading";
 
 const initialGroups = [
@@ -128,6 +133,139 @@ const initialContracts = [
 const productTypes = ["อาหาร", "เสื้อผ้า", "ของใช้", "อุปกรณ์", "อื่นๆ"];
 const sellDays = ["ทุกวัน", "เสาร์", "อาทิตย์", "เสาร์-อาทิตย์"];
 
+dayjs.extend(buddhistEra);
+dayjs.locale("th");
+
+const thaiMonths = Array.from({ length: 12 }, (_, monthIndex) =>
+  dayjs().month(monthIndex).format("MMMM"),
+);
+
+const currentYear = dayjs().year();
+const calendarYears = Array.from(
+  { length: 121 },
+  (_, index) => currentYear - 60 + index,
+);
+
+const toDate = (dateValue) => {
+  if (!dateValue) return null;
+  const parsed = dayjs(dateValue);
+  return parsed.isValid() ? parsed.toDate() : null;
+};
+
+const toStorageDate = (dateValue) => {
+  if (!dateValue) return "";
+  return dayjs(dateValue).format("YYYY-MM-DD");
+};
+
+const toThaiDisplayDate = (dateValue) => {
+  if (!dateValue) return "-";
+  return dayjs(dateValue).format("DD/MM/BBBB");
+};
+
+const DateInput = forwardRef(({ value, onClick, placeholder }, ref) => (
+  <button
+    type="button"
+    ref={ref}
+    onClick={onClick}
+    className="flex h-12 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 text-left text-sm text-gray-700 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
+  >
+    <span className={value ? "text-gray-700" : "text-gray-400"}>
+      {value || placeholder}
+    </span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-4 w-4 text-gray-500"
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="5.5" width="17" height="15" rx="2.5" />
+      <path d="M7.5 3.5v4M16.5 3.5v4M3.5 9.5h17" />
+    </svg>
+  </button>
+));
+
+DateInput.displayName = "DateInput";
+
+function BuddhistDatePicker({ value, onChange, minDate, placeholder }) {
+  const selectedDate = toDate(value);
+
+  return (
+    <DatePicker
+      selected={selectedDate}
+      onChange={(date) => onChange(toStorageDate(date))}
+      minDate={minDate || undefined}
+      shouldCloseOnSelect
+      popperPlacement="bottom-start"
+      calendarClassName="buddhist-datepicker"
+      wrapperClassName="w-full"
+      customInput={<DateInput placeholder={placeholder} />}
+      value={selectedDate ? toThaiDisplayDate(value) : ""}
+      formatWeekDay={(dayName) => dayName.slice(0, 2)}
+      renderCustomHeader={({
+        date,
+        changeMonth,
+        changeYear,
+        decreaseMonth,
+        increaseMonth,
+        prevMonthButtonDisabled,
+        nextMonthButtonDisabled,
+      }) => (
+        <div className="mb-3 flex items-center justify-between gap-2 rounded-lg bg-gray-50 p-2">
+          <button
+            type="button"
+            onClick={decreaseMonth}
+            disabled={prevMonthButtonDisabled}
+            className="h-8 w-8 rounded-md border border-gray-200 bg-white text-gray-600 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {"<"}
+          </button>
+
+          <div className="flex items-center gap-2">
+            <select
+              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700"
+              value={dayjs(date).month()}
+              onChange={({ target: { value: monthValue } }) =>
+                changeMonth(Number(monthValue))
+              }
+            >
+              {thaiMonths.map((month, monthIndex) => (
+                <option key={month} value={monthIndex}>
+                  {month}
+                </option>
+              ))}
+            </select>
+            <select
+              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700"
+              value={dayjs(date).year()}
+              onChange={({ target: { value: yearValue } }) =>
+                changeYear(Number(yearValue))
+              }
+            >
+              {calendarYears.map((yearValue) => (
+                <option key={yearValue} value={yearValue}>
+                  {yearValue + 543}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={increaseMonth}
+            disabled={nextMonthButtonDisabled}
+            className="h-8 w-8 rounded-md border border-gray-200 bg-white text-gray-600 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {">"}
+          </button>
+        </div>
+      )}
+    />
+  );
+}
+
 function ManageAgreement() {
   const [isLoading] = useState(false);
   const [view, setView] = useState("list");
@@ -197,6 +335,21 @@ function ManageAgreement() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDateChange = (name, value) => {
+    setFormData((prev) => {
+      if (name === "contractDate") {
+        const shouldResetEndDate =
+          prev.endDate && value && dayjs(prev.endDate).isBefore(dayjs(value));
+        return {
+          ...prev,
+          contractDate: value,
+          endDate: shouldResetEndDate ? "" : prev.endDate,
+        };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
   const handleSave = () => {
     if (!formData.stallId) {
       handleBackFromForm();
@@ -210,8 +363,8 @@ function ManageAgreement() {
         renterId: formData.renterId || "-",
         productType: formData.productType || "-",
         rent: "50.00",
-        startDate: formData.contractDate || "-",
-        endDate: formData.endDate || "-",
+        startDate: toThaiDisplayDate(formData.contractDate),
+        endDate: toThaiDisplayDate(formData.endDate),
       },
     ]);
     handleBackFromForm();
@@ -393,7 +546,7 @@ function ManageAgreement() {
                   <input
                     className={`input input-bordered w-full ${
                       selectedStall ? "bg-gray-200" : ""
-                    }`}
+                    } h-12`}
                     name="stallId"
                     value={formData.stallId}
                     onChange={handleFormChange}
@@ -408,7 +561,7 @@ function ManageAgreement() {
                   <input
                     className={`input input-bordered w-full ${
                       selectedStall ? "bg-gray-200" : ""
-                    }`}
+                    } h-12`}
                     name="groupName"
                     value={formData.groupName}
                     onChange={handleFormChange}
@@ -421,7 +574,7 @@ function ManageAgreement() {
                     <span className="label-text text-lg">รหัสผู้เช่า</span>
                   </label>
                   <input
-                    className="input input-bordered w-full"
+                    className="input input-bordered w-full h-12"
                     name="renterId"
                     value={formData.renterId}
                     onChange={handleFormChange}
@@ -433,7 +586,7 @@ function ManageAgreement() {
                     <span className="label-text text-lg">ชื่อร้าน</span>
                   </label>
                   <input
-                    className="input input-bordered w-full"
+                    className="input input-bordered w-full h-12"
                     name="shopName"
                     value={formData.shopName}
                     onChange={handleFormChange}
@@ -445,7 +598,7 @@ function ManageAgreement() {
                     <span className="label-text text-lg">ประเภทสินค้า</span>
                   </label>
                   <select
-                    className="select select-bordered w-full"
+                    className="select select-bordered w-full h-12"
                     name="productType"
                     value={formData.productType}
                     onChange={handleFormChange}
@@ -466,7 +619,7 @@ function ManageAgreement() {
                     <span className="label-text text-lg">วันที่ขาย</span>
                   </label>
                   <select
-                    className="select select-bordered w-full"
+                    className="select select-bordered w-full h-12"
                     name="sellDay"
                     value={formData.sellDay}
                     onChange={handleFormChange}
@@ -483,24 +636,21 @@ function ManageAgreement() {
                   <label className="label">
                     <span className="label-text text-lg">วันที่ทำสัญญา</span>
                   </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    name="contractDate"
+                  <BuddhistDatePicker
                     value={formData.contractDate}
-                    onChange={handleFormChange}
+                    onChange={(value) => handleDateChange("contractDate", value)}
+                    placeholder="เลือกวันที่ทำสัญญา"
                   />
                 </div>
                 <div>
                   <label className="label">
                     <span className="label-text text-lg">วันสิ้นสุดสัญญา</span>
                   </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    name="endDate"
+                  <BuddhistDatePicker
                     value={formData.endDate}
-                    onChange={handleFormChange}
+                    onChange={(value) => handleDateChange("endDate", value)}
+                    minDate={toDate(formData.contractDate)}
+                    placeholder="เลือกวันสิ้นสุดสัญญา"
                   />
                 </div>
               </div>

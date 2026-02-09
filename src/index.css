@@ -20,3 +20,55 @@ select {
 *::-webkit-scrollbar {
   display: none;
 }
+
+input {
+  height: 3rem;
+}
+
+.buddhist-datepicker {
+  border: 1px solid #d1d5db !important;
+  /* border-radius: 4px !important; */
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1) !important;
+  font-family: "Noto Sans Thai Looped", sans-serif !important;
+  overflow: hidden;
+}
+
+.buddhist-datepicker .react-datepicker__month-container {
+  background: #ffffff;
+}
+
+.buddhist-datepicker .react-datepicker__header {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding-top: 10px;
+}
+
+.buddhist-datepicker .react-datepicker__day-name {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.buddhist-datepicker .react-datepicker__day {
+  /* border-radius: 8px; */
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.buddhist-datepicker .react-datepicker__day:hover {
+  background: #f3f4f6;
+}
+
+.buddhist-datepicker .react-datepicker__day--selected,
+.buddhist-datepicker .react-datepicker__day--keyboard-selected {
+  background: #8b8b8b;
+  color: #ffffff;
+}
+
+.buddhist-datepicker .react-datepicker__day--today {
+  border: 1px solid #9ca3af;
+  font-weight: 700;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}

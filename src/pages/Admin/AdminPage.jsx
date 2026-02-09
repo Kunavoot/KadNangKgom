@@ -7,6 +7,8 @@ import ManageMemberType from "../../components/Admin/ManageMemberType";
 import ManageMarket from "../../components/Admin/ManageMarket";
 import ManageProductType from "../../components/Admin/ManageProductType";
 import ManageAgreement from "../../components/Admin/ManageAgreement";
+import ReportSale from "../../components/Admin/ReportSale";
+import ReportMap from "../../components/Admin/ReportMap";
 
 function AdminPage() {
   const [isPage, setIsPage] = useState("");
@@ -41,6 +43,8 @@ function AdminPage() {
               {isPage === "manageMarket" && <ManageMarket />}
               {isPage === "manageProductType" && <ManageProductType />}
               {isPage === "manageAgreement" && <ManageAgreement />}
+              {isPage === "reportSale" && <ReportSale />}
+              {isPage === "reportMap" && <ReportMap />}
             </div>
 
             {/* Drawer Side */}
@@ -140,10 +144,20 @@ function AdminPage() {
                     รายงาน
                   </li>
                   <li>
-                    <a>ยอดขาย</a>
+                    <a
+                      className={isPage === "reportSale" ? "bg-[#71FF7A]" : ""}
+                      onClick={() => setIsPage("reportSale")}
+                    >
+                      ยอดขาย
+                    </a>
                   </li>
                   <li>
-                    <a>พื้นที่ตลาด</a>
+                    <a
+                      className={isPage === "reportMap" ? "bg[#71FF7A]" : ""}
+                      onClick={() => setIsPage("reportMap")}
+                    >
+                      พื้นที่ตลาด
+                    </a>
                   </li>
                   
                   {/* ส่วนปุ่มออกจากระบบ */}

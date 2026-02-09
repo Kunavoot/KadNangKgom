@@ -380,14 +380,14 @@ function ManageMarket() {
               </div>
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">ตำแหน่ง</span>
+                  <span className="label-text text-lg">ตำแหน่งที่ตั้ง</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
                   name="location"
                   value={formData.location}
                   onChange={handleFormChange}
-                  placeholder="กรอกตำแหน่ง"
+                  placeholder="กรอกตำแหน่งที่ตั้ง"
                 />
               </div>
               <div>
