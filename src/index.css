@@ -5,7 +5,8 @@
 }
 
 input,
-select {
+select,
+textarea {
   outline: none !important;
 }
 
@@ -21,7 +22,8 @@ select {
   display: none;
 }
 
-input, select {
+input,
+select {
   height: 2.5rem;
 }
 

@@ -7,6 +7,7 @@ import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Registration from "./pages/Registration.jsx";
 import AdminPage from "./pages/Admin/AdminPage.jsx";
+import TraderPage from "./pages/Trader/TraderPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/registration" element={<Registration />} />
 
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/trader" element={<TraderPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
