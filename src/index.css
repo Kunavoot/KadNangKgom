@@ -21,8 +21,8 @@ select {
   display: none;
 }
 
-input {
-  height: 3rem;
+input, select {
+  height: 2.5rem;
 }
 
 .buddhist-datepicker {

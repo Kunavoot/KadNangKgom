@@ -49,12 +49,12 @@ function Navbar() {
               style={{ marginRight: ["2rem"] }}
             >
               <li>
-                <a href="#" className="text-[#CFCFCF]">
+                <a href="/registration" className="text-[#CFCFCF]">
                   สมัครสมาชิก
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white">
+                <a href="/login" className="text-white">
                   เข้าสู่ระบบ
                 </a>
               </li>
@@ -67,7 +67,7 @@ function Navbar() {
       <div className="bg-[#EDEDED] w-full h-1/3 content-center text-center ">
         <ul className="menu menu-horizontal rounded-box text-xl gap-8">
           <li>
-            <a className="hover:font-bold" href="#">
+            <a className="hover:font-bold" href="/">
               หน้าแรก
             </a>
           </li>

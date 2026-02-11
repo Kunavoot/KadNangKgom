@@ -98,30 +98,34 @@ function Registration() {
                     {/* ตัวเลือกที่ 1 */}
                     <div className="form-control">
                       <label className="label cursor-pointer gap-2">
-                        <input
-                          type="radio"
-                          name="role"
-                          className="radio radio-xs radio-success" // สีเขียวเข้ากับธีมกาดนั่งก้อม
-                          value="customer"
-                          //   checked={role === "customer"}
-                          //   onChange={(e) => setRole(e.target.value)}
-                        />
-                        <span className="label-text">มีรถ</span>
+                        <div className="flex items-center h-[3rem] gap-2">
+                          <input
+                            type="radio"
+                            name="role"
+                            className="radio radio-xs max-h-4 w-4 radio-success" // สีเขียวเข้ากับธีมกาดนั่งก้อม
+                            value="customer"
+                            //   checked={role === "customer"}
+                            //   onChange={(e) => setRole(e.target.value)}
+                          />
+                          <span className="label-text">มีรถ</span>
+                        </div>
                       </label>
                     </div>
 
                     {/* ตัวเลือกที่ 2 */}
                     <div className="form-control">
                       <label className="label cursor-pointer gap-2">
-                        <input
-                          type="radio"
-                          name="role"
-                          className="radio radio-xs radio-success"
-                          value="vendor"
-                          //   checked={role === "vendor"}
-                          //   onChange={(e) => setRole(e.target.value)}
-                        />
-                        <span className="label-text">ไม่มีรถ</span>
+                        <div className="flex items-center h-[3rem] gap-2">
+                          <input
+                            type="radio"
+                            name="role"
+                            className="radio radio-xs max-h-4 w-4 radio-success"
+                            value="vendor"
+                            //   checked={role === "vendor"}
+                            //   onChange={(e) => setRole(e.target.value)}
+                          />
+                          <span className="label-text">ไม่มีรถ</span>
+                        </div>
                       </label>
                     </div>
                   </div>

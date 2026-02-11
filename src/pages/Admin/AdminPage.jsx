@@ -153,7 +153,7 @@ function AdminPage() {
                   </li>
                   <li>
                     <a
-                      className={isPage === "reportMap" ? "bg[#71FF7A]" : ""}
+                      className={isPage === "reportMap" ? "bg-[#71FF7A]" : ""}
                       onClick={() => setIsPage("reportMap")}
                     >
                       พื้นที่ตลาด

@@ -45,6 +45,55 @@ function getStallChipClass(status) {
 
 function ReportMap() {
   const [activeDay, setActiveDay] = useState("วันเสาร์");
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [mapZoom, setMapZoom] = useState(1);
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+  const [isDraggingMap, setIsDraggingMap] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const closeExpandedMap = () => {
+    setIsMapExpanded(false);
+    setMapZoom(1);
+    setMapOffset({ x: 0, y: 0 });
+    setIsDraggingMap(false);
+  };
+
+  const zoomIn = () => setMapZoom((prev) => Math.min(prev + 0.25, 3));
+  const zoomOut = () => {
+    const nextZoom = Math.max(mapZoom - 0.25, 1);
+    setMapZoom(nextZoom);
+    if (nextZoom === 1) {
+      setMapOffset({ x: 0, y: 0 });
+      setIsDraggingMap(false);
+    }
+  };
+
+  const onMapPointerDown = (event) => {
+    if (mapZoom <= 1) return;
+    if (event.target.closest('[data-map-controls="true"]')) return;
+    event.preventDefault();
+    setIsDraggingMap(true);
+    setDragStart({
+      x: event.clientX - mapOffset.x,
+      y: event.clientY - mapOffset.y,
+    });
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const onMapPointerMove = (event) => {
+    if (!isDraggingMap) return;
+    setMapOffset({
+      x: event.clientX - dragStart.x,
+      y: event.clientY - dragStart.y,
+    });
+  };
+
+  const onMapPointerUp = (event) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setIsDraggingMap(false);
+  };
 
   return (
     <div className="w-full pb-4">
@@ -54,16 +103,35 @@ function ReportMap() {
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_370px]">
         <div className="rounded-lg border border-gray-300 bg-white p-3 shadow-sm">
-          <div className="mx-auto w-full max-w-[1060px] overflow-hidden rounded-md border border-gray-300 bg-[#f6f6f6]">
+          {/* <div className="mx-auto w-full max-w-[1060px] overflow-hidden rounded-md border border-gray-300 bg-[#f6f6f6]">
+            <button
+              type="button"
+              onClick={() => setIsMapExpanded(true)}
+              className="block w-full cursor-zoom-in"
+              aria-label="ขยายรูปแผนผังพื้นที่ตลาด"
+            >
+              <img
+                src="/asset/map_market.png"
+                alt="แผนผังพื้นที่ตลาด"
+                className="h-auto w-full object-contain xl:max-h-[calc(100vh-220px)]"
+              />
+            </button>
+          </div> */}
+          <button
+            type="button"
+            onClick={() => setIsMapExpanded(true)}
+            className="block w-full cursor-zoom-in"
+            aria-label="ขยายรูปแผนผังพื้นที่ตลาด"
+          >
             <img
               src="/asset/map_market.png"
               alt="แผนผังพื้นที่ตลาด"
-              className="h-auto w-full object-contain xl:max-h-[calc(100vh-220px)]"
+              className="h-full w-full object-contain "
             />
-          </div>
+          </button>
         </div>
 
-        <div className="rounded-lg border border-black bg-black p-3 shadow-sm">
+        <div className="rounded-lg border border-gray-300 bg-white p-3 shadow-sm">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {dayFilters.map((day) => {
               const active = activeDay === day;
@@ -95,7 +163,10 @@ function ReportMap() {
 
           <div className="space-y-3">
             {groups.map((group) => (
-              <div key={group.id} className="rounded bg-[#dddddd] p-2.5">
+              <div
+                key={group.id}
+                className="rounded bg-gray-100 p-2.5 min-h-[180px]"
+              >
                 <div className="mb-2 rounded bg-[#65ef6e] px-3 py-1.5 text-2xl font-semibold">
                   กลุ่มสังกัด : {group.name}
                 </div>
@@ -111,19 +182,74 @@ function ReportMap() {
                     </span>
                   ))}
 
-                  {Array.from({ length: 8 }).map((_, idx) => (
+                  {/* {Array.from({ length: 8 }).map((_, idx) => (
                     <span
                       key={`${group.id}-empty-${idx}`}
                       className="inline-flex h-9 w-9 rounded-full bg-[#bfbfbf]"
                       aria-hidden="true"
                     />
-                  ))}
+                  ))} */}
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {isMapExpanded && (
+        <div
+          className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-black/75 p-4"
+          onClick={closeExpandedMap}
+          role="dialog"
+          aria-modal="true"
+          aria-label="รูปแผนผังพื้นที่ตลาดแบบขยาย"
+        >
+          <div
+            className="relative max-h-[90vh] max-w-[95vw] overflow-auto rounded-md"
+            onClick={(event) => event.stopPropagation()}
+            onPointerDown={onMapPointerDown}
+            onPointerMove={onMapPointerMove}
+            onPointerUp={onMapPointerUp}
+            onPointerCancel={onMapPointerUp}
+            style={{ touchAction: mapZoom > 1 ? "none" : "auto" }}
+          >
+            <div
+              className="fixed right-6 top-6 z-[60] flex items-center gap-2"
+              data-map-controls="true"
+            >
+              <button
+                type="button"
+                onClick={zoomOut}
+                disabled={mapZoom <= 1}
+                className="h-9 w-9 rounded-full bg-white text-xl font-semibold text-black disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="ซูมออก"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                onClick={zoomIn}
+                disabled={mapZoom >= 3}
+                className="h-9 w-9 rounded-full bg-white text-xl font-semibold text-black disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="ซูมเข้า"
+              >
+                +
+              </button>
+            </div>
+
+            <img
+              src="/asset/map_market.png"
+              alt="แผนผังพื้นที่ตลาดแบบขยาย"
+              className={`max-h-[90vh] w-auto max-w-[95vw] rounded-md object-contain ${
+                isDraggingMap ? "" : "transition-transform duration-150"
+              } ${mapZoom > 1 ? (isDraggingMap ? "cursor-grabbing" : "cursor-grab") : ""}`}
+              style={{
+                transform: `translate(${mapOffset.x}px, ${mapOffset.y}px) scale(${mapZoom})`,
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
