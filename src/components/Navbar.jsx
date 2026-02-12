@@ -72,7 +72,7 @@ function Navbar() {
             </a>
           </li>
           <li>
-            <a className="hover:font-bold" href="#">
+            <a className="hover:font-bold" href="/map">
               แผนผัง
             </a>
           </li>

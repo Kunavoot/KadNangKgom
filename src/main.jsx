@@ -4,6 +4,7 @@ import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { AuthProvider } from "./service/AuthContext.jsx";
 import Home from "./pages/Home.jsx";
+import Map from "./pages/Map.jsx";
 import Login from "./pages/Login.jsx";
 import Registration from "./pages/Registration.jsx";
 import AdminPage from "./pages/Admin/AdminPage.jsx";
@@ -15,6 +16,7 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/map" element={<Map />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registration" element={<Registration />} />
 
