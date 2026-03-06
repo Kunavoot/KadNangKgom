@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import ManageAdmin from "../../components/Admin/ManageAdmin";
 import ManageTrader from "../../components/Admin/ManageTrader";
@@ -9,9 +9,50 @@ import ManageProductType from "../../components/Admin/ManageProductType";
 import ManageAgreement from "../../components/Admin/ManageAgreement";
 import ReportSale from "../../components/Admin/ReportSale";
 import ReportMap from "../../components/Admin/ReportMap";
+import Swal from "sweetalert2";
+import { useAuth } from "../../service/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 function AdminPage() {
+  const { isLoggedIn, user, logout } = useAuth();
   const [isPage, setIsPage] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoggedIn === false) {
+      Swal.fire({
+        icon: "error",
+        title: "คุณยังไม่ได้เข้าสู่ระบบ",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      navigate("/");
+    } else if (user.role !== "admin") {
+      Swal.fire({
+        icon: "error",
+        title: "คุณไม่มีสิทธิ์เข้าถึง",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      navigate("/");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    try {
+      navigate("/");
+      logout();
+      Swal.fire({
+        icon: "success",
+        title: "ออกจากระบบเสร็จสิ้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <div className="w-screen h-screen flex flex-col">
@@ -163,7 +204,7 @@ function AdminPage() {
                   {/* ส่วนปุ่มออกจากระบบ */}
                   <div className="mt-6 mb-2">
                     <button
-                      onClick={() => console.log("Logout clicked")}
+                      onClick={() => handleLogout()}
                       className="btn btn-error w-full text-white text-lg min-h-12 rounded-xl bg-[#ff7675] border-none hover:bg-[#fab1a0] font-bold"
                     >
                       ออกจากระบบ

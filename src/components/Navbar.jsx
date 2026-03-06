@@ -1,15 +1,33 @@
 import { React, useEffect } from "react";
 import { useAuth } from "../service/AuthContext.jsx";
+import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
 
 function Navbar() {
-  const { isLoggedIn, user, logout } = useAuth()
-  console.log("Navbar - isLoggedIn:", isLoggedIn);
-  console.log("Navbar - user:", user);
-  
-  useEffect(() => {
-    console.log("Navbar - isLoggedIn changed:", isLoggedIn);
-    console.log("Navbar - user changed:", user);
-  }, [isLoggedIn, user]);
+  const navigate = useNavigate();
+  const { isLoggedIn, user, logout } = useAuth();
+  // console.log("Navbar - isLoggedIn:", isLoggedIn);
+  // console.log("Navbar - user:", user);
+
+  // useEffect(() => {
+  //   console.log("Navbar - isLoggedIn changed:", isLoggedIn);
+  //   console.log("Navbar - user changed:", user);
+  // }, [isLoggedIn, user]);
+
+  const handleLogout = () => {
+    try {
+      navigate("/");
+      logout();
+      Swal.fire({
+        icon: "success",
+        title: "ออกจากระบบเสร็จสิ้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -20,7 +38,7 @@ function Navbar() {
         <div className="navbar-center">
           <div className="flex items-center gap-3">
             <img src="/logo.jpg" alt="logo" className="w-20 rounded-full" />
-            <p className="text-4xl text-white">กาดนั่งก้อม</p>
+            <p className="text-4xl text-white cursor-default">กาดนั่งก้อม</p>
           </div>
         </div>
 
@@ -31,12 +49,22 @@ function Navbar() {
               style={{ marginRight: ["2rem"] }}
             >
               <li>
-                <p className="text-[#CFCFCF] cursor-default">
+                <a
+                  onClick={() =>
+                    user?.role === "admin"
+                      ? navigate("/admin")
+                      : navigate("/trader")
+                  }
+                  className="text-[#CFCFCF] cursor-pointer"
+                >
                   คุณ {user ? user.name : "ผู้ใช้"}
-                </p>
+                </a>
               </li>
               <li>
-                <a onClick={() => logout()} className="text-white cursor-pointer">
+                <a
+                  onClick={() => handleLogout()}
+                  className="text-white cursor-pointer"
+                >
                   ออกจากระบบ
                 </a>
               </li>
@@ -49,12 +77,15 @@ function Navbar() {
               style={{ marginRight: ["2rem"] }}
             >
               <li>
-                <a href="/registration" className="text-[#CFCFCF]">
+                <a
+                  onClick={() => navigate("/registration")}
+                  className="text-[#CFCFCF]"
+                >
                   สมัครสมาชิก
                 </a>
               </li>
               <li>
-                <a href="/login" className="text-white">
+                <a onClick={() => navigate("/login")} className="text-white">
                   เข้าสู่ระบบ
                 </a>
               </li>
@@ -67,22 +98,22 @@ function Navbar() {
       <div className="bg-[#EDEDED] w-full h-1/3 content-center text-center ">
         <ul className="menu menu-horizontal rounded-box text-xl gap-8">
           <li>
-            <a className="hover:font-bold" href="/">
+            <a onClick={() => navigate("/")} className="hover:font-bold">
               หน้าแรก
             </a>
           </li>
           <li>
-            <a className="hover:font-bold" href="/map">
+            <a onClick={() => navigate("/map")} className="hover:font-bold">
               แผนผัง
             </a>
           </li>
           <li>
-            <a className="hover:font-bold" href="#">
+            <a onClick={() => navigate("/")} className="hover:font-bold">
               เกี่ยวกับเรา
             </a>
           </li>
           <li>
-            <a className="hover:font-bold" href="#">
+            <a onClick={() => navigate("/")} className="hover:font-bold">
               ติดต่อเรา
             </a>
           </li>

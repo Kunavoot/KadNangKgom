@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../service/AuthContext.jsx";
 import axios from "axios";
@@ -10,6 +10,18 @@ function Home() {
   const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      Swal.fire({
+        icon: "error",
+        title: "คุณได้เข้าสู่ระบบอยู่แล้ว",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      navigate("/");
+    }
+  }, []);
 
   const handleLogin = () => {
     try {
@@ -106,7 +118,10 @@ function Home() {
 
             <div className="mt-4 text-sm">
               <label className="text-[#7D7D7D]">ต้องการเข้าร่วมกับเรา?</label>
-              <a href="#" className="text-[#5bc06d] hover:underline ml-2">
+              <a
+                onClick={() => navigate("/registration")}
+                className="cursor-pointer text-[#5bc06d] hover:underline ml-2"
+              >
                 สมัครสมาชิก
               </a>
             </div>
