@@ -2,7 +2,7 @@ import { React, useEffect } from "react";
 import { useAuth } from "../service/AuthContext.jsx";
 
 function Navbar() {
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, user, logout } = useAuth()
   console.log("Navbar - isLoggedIn:", isLoggedIn);
   console.log("Navbar - user:", user);
   
@@ -32,7 +32,7 @@ function Navbar() {
             >
               <li>
                 <p className="text-[#CFCFCF] cursor-default">
-                  คุณ {user ? user.username : "ผู้ใช้"}
+                  คุณ {user ? user.name : "ผู้ใช้"}
                 </p>
               </li>
               <li>

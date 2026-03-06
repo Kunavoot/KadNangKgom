@@ -1,19 +1,69 @@
-import React from "react";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../service/AuthContext.jsx";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router";
 
 function Home() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // ตัวอย่างข้อมูลผู้ใช้
-    const userData = {
-      username: "Kunavoot",
-      email: "kunavoot@mail.com",
-    };
+  const handleLogin = () => {
+    try {
+      if (username === "" || password === "") {
+        Swal.fire({
+          icon: "error",
+          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        return;
+      }
 
-    login(userData);
+      axios
+        .post(
+          import.meta.env.VITE_API_URL +
+            "/system/login?username=" +
+            username +
+            "&password=" +
+            password,
+        )
+        .then((response) => {
+          Swal.fire({
+            icon: "success",
+            title: "เข้าสู่ระบบสำเร็จ",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+          // เก็บข้อมูลผู้ใช้
+          const userData = {
+            username: response.data.data.username,
+            name: response.data.data.name,
+            fullname: response.data.data.fullname,
+            role: response.data.data.role,
+          };
+          login(userData);
+
+          if (response.data.data.role === "admin") {
+            navigate("/admin");
+          } else {
+            navigate("/trader");
+          }
+        })
+        .catch((error) => {
+          Swal.fire({
+            icon: "error",
+            title: error.response.data.message,
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -33,6 +83,8 @@ function Home() {
                 type="text"
                 className="input px-3 w-full focus:border-[#5bc06d]"
                 placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
 
               <label className="label">Password</label>
@@ -40,9 +92,14 @@ function Home() {
                 type="password"
                 className="input px-3 w-full focus:border-[#5bc06d]"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
 
-              <button className="btn w-full mt-7 bg-[#72DF82] hover:bg-[#5bc06d]" onClick={(e) =>handleLogin(e)}>
+              <button
+                className="btn w-full mt-7 bg-[#72DF82] hover:bg-[#5bc06d]"
+                onClick={() => handleLogin()}
+              >
                 ดำเนินการต่อ
               </button>
             </fieldset>

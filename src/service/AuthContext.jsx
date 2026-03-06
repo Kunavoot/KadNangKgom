@@ -1,21 +1,31 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from "react";
 
-// 1. สร้าง Context
 const AuthContext = createContext(null);
 
-// 2. สร้าง Provider Component
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  // เริ่มต้น State จาก localStorage ถ้ามีข้อมูลอยู่
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem("isLoggedIn") === "true";
+  });
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   const login = (userData) => {
     setIsLoggedIn(true);
     setUser(userData);
+    // บันทึกลง localStorage
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUser(null);
+    // ล้างข้อมูลใน localStorage
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
   };
 
   return (
@@ -25,6 +35,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 3. สร้าง Custom Hook เพื่อเรียกใช้ง่ายๆ
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
