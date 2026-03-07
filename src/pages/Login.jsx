@@ -89,7 +89,15 @@ function Home() {
         <div className="card flex flex-row bg-base-100 w-[50%] h-[50%] m-auto mt-16 shadow-[0px_0px_28.799999237060547px_0px_rgba(0,0,0,0.25)]">
           <div className="flex-1 w-[45%] h-[80%] text-center justify-center m-auto">
             <h3 className="card text-2xl text-left pl-7 mb-7">เข้าสู่ระบบ</h3>
-            <fieldset className="fieldset w-[80%] m-auto">
+            <fieldset
+              className="fieldset w-[80%] m-auto"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleLogin();
+                }
+              }}
+            >
               <label className="label">Username</label>
               <input
                 type="text"

@@ -1,10 +1,11 @@
-import React, { forwardRef, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
-import buddhistEra from "dayjs/plugin/buddhistEra";
-import "dayjs/locale/th";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import Loading from "../Loading";
+import {
+  BuddhistDatePicker,
+  toDate,
+  toThaiDisplayDate,
+} from "../../utils/utils.jsx";
 
 const initialGroups = [
   {
@@ -132,139 +133,6 @@ const initialContracts = [
 
 const productTypes = ["อาหาร", "เสื้อผ้า", "ของใช้", "อุปกรณ์", "อื่นๆ"];
 const sellDays = ["ทุกวัน", "เสาร์", "อาทิตย์", "เสาร์-อาทิตย์"];
-
-dayjs.extend(buddhistEra);
-dayjs.locale("th");
-
-const thaiMonths = Array.from({ length: 12 }, (_, monthIndex) =>
-  dayjs().month(monthIndex).format("MMMM"),
-);
-
-const currentYear = dayjs().year();
-const calendarYears = Array.from(
-  { length: 121 },
-  (_, index) => currentYear - 60 + index,
-);
-
-const toDate = (dateValue) => {
-  if (!dateValue) return null;
-  const parsed = dayjs(dateValue);
-  return parsed.isValid() ? parsed.toDate() : null;
-};
-
-const toStorageDate = (dateValue) => {
-  if (!dateValue) return "";
-  return dayjs(dateValue).format("YYYY-MM-DD");
-};
-
-const toThaiDisplayDate = (dateValue) => {
-  if (!dateValue) return "-";
-  return dayjs(dateValue).format("DD/MM/BBBB");
-};
-
-const DateInput = forwardRef(({ value, onClick, placeholder }, ref) => (
-  <button
-    type="button"
-    ref={ref}
-    onClick={onClick}
-    className="flex h-12 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 text-left text-sm text-gray-700 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
-  >
-    <span className={value ? "text-gray-700" : "text-gray-400"}>
-      {value || placeholder}
-    </span>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-4 w-4 text-gray-500"
-      aria-hidden="true"
-    >
-      <rect x="3.5" y="5.5" width="17" height="15" rx="2.5" />
-      <path d="M7.5 3.5v4M16.5 3.5v4M3.5 9.5h17" />
-    </svg>
-  </button>
-));
-
-DateInput.displayName = "DateInput";
-
-function BuddhistDatePicker({ value, onChange, minDate, placeholder }) {
-  const selectedDate = toDate(value);
-
-  return (
-    <DatePicker
-      selected={selectedDate}
-      onChange={(date) => onChange(toStorageDate(date))}
-      minDate={minDate || undefined}
-      shouldCloseOnSelect
-      popperPlacement="bottom-start"
-      calendarClassName="buddhist-datepicker"
-      wrapperClassName="w-full"
-      customInput={<DateInput placeholder={placeholder} />}
-      value={selectedDate ? toThaiDisplayDate(value) : ""}
-      formatWeekDay={(dayName) => dayName.slice(0, 2)}
-      renderCustomHeader={({
-        date,
-        changeMonth,
-        changeYear,
-        decreaseMonth,
-        increaseMonth,
-        prevMonthButtonDisabled,
-        nextMonthButtonDisabled,
-      }) => (
-        <div className="mb-3 flex items-center justify-between gap-2 rounded-lg bg-gray-50 p-2">
-          <button
-            type="button"
-            onClick={decreaseMonth}
-            disabled={prevMonthButtonDisabled}
-            className="h-8 w-8 rounded-md border border-gray-200 bg-white text-gray-600 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {"<"}
-          </button>
-
-          <div className="flex items-center gap-2">
-            <select
-              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700"
-              value={dayjs(date).month()}
-              onChange={({ target: { value: monthValue } }) =>
-                changeMonth(Number(monthValue))
-              }
-            >
-              {thaiMonths.map((month, monthIndex) => (
-                <option key={month} value={monthIndex}>
-                  {month}
-                </option>
-              ))}
-            </select>
-            <select
-              className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700"
-              value={dayjs(date).year()}
-              onChange={({ target: { value: yearValue } }) =>
-                changeYear(Number(yearValue))
-              }
-            >
-              {calendarYears.map((yearValue) => (
-                <option key={yearValue} value={yearValue}>
-                  {yearValue + 543}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={increaseMonth}
-            disabled={nextMonthButtonDisabled}
-            className="h-8 w-8 rounded-md border border-gray-200 bg-white text-gray-600 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {">"}
-          </button>
-        </div>
-      )}
-    />
-  );
-}
 
 function ManageAgreement() {
   const [isLoading] = useState(false);
@@ -504,7 +372,8 @@ function ManageAgreement() {
                 : Array.from({ length: 10 }).map((_, index) => ({
                     id: `0${index + 1}000`,
                     status: "ไม่พร้อม",
-                  })))
+                  }))
+              )
                 .slice(0, 12)
                 .map((stall) => (
                   <button
@@ -525,9 +394,7 @@ function ManageAgreement() {
       {view === "form" && (
         <div className="border border-gray-200 rounded-lg shadow-lg overflow-hidden">
           <div className="bg-[#8EEA8B] px-6 py-4 flex items-center justify-between">
-            <div className="text-3xl font-bold text-green-800">
-              จัดการสัญญา
-            </div>
+            <div className="text-3xl font-bold text-green-800">จัดการสัญญา</div>
             <button
               className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
               onClick={handleBackFromForm}
@@ -638,7 +505,9 @@ function ManageAgreement() {
                   </label>
                   <BuddhistDatePicker
                     value={formData.contractDate}
-                    onChange={(value) => handleDateChange("contractDate", value)}
+                    onChange={(value) =>
+                      handleDateChange("contractDate", value)
+                    }
                     placeholder="เลือกวันที่ทำสัญญา"
                   />
                 </div>
