@@ -38,6 +38,32 @@ function ManageAdmin() {
     console.log("Editing id:", item);
   };
 
+  const handleDelete = async (admin_no) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.delete(
+        import.meta.env.VITE_API_URL + "/admin/delAdmin/" + admin_no,
+      );
+      Swal.fire({
+        icon: "success",
+        title: response.data.message,
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } catch (error) {
+      console.error("Error deleting admin:", error);
+      Swal.fire({
+        icon: "error",
+        title: error.response.data.message,
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } finally {
+      setIsLoading(false);
+      getAdmin();
+    }
+  };
+
   const handleAdd = () => {
     setFormType("add");
     setIsFrom(true);
@@ -52,7 +78,7 @@ function ManageAdmin() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value.trim() }));
   };
 
   const handleAdminBirthChange = (value) => {
@@ -65,6 +91,7 @@ function ManageAdmin() {
 
   const handleSave = async () => {
     setIsLoading(true);
+    // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
       if (item === "admin_no") {
         continue;
@@ -72,6 +99,49 @@ function ManageAdmin() {
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.admin_un.match(/^[a-zA-Z0-9]+$/)) {
+        Swal.fire({
+          icon: "error",
+          title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.admin_pw.match(/^[a-zA-Z0-9]+$/)) {
+        Swal.fire({
+          icon: "error",
+          title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (
+        !formData.admin_tel.match(/^[0-9]+$/) ||
+        formData.admin_tel.length !== 10
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้นและมีความยาว 10 หลัก",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return;
+      }
+      if (formData.admin_birth > formData.admin_date) {
+        Swal.fire({
+          icon: "error",
+          title: "วันเกิดต้องน้อยกว่าวันเข้ารับตำแหน่ง",
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
@@ -105,15 +175,33 @@ function ManageAdmin() {
         setIsLoading(false);
       }
     } else if (formType === "edit" && selectedItem) {
-      setDetails((prev) =>
-        prev.map((item) =>
-          item.admin_no === selectedItem.admin_no
-            ? { ...item, ...formData }
-            : item,
-        ),
-      );
+      try {
+        const response = await axios.put(
+          import.meta.env.VITE_API_URL +
+            "/admin/editAdmin/" +
+            selectedItem.admin_no,
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error adding admin:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        getAdmin();
+        handleBackToList();
+        setIsLoading(false);
+      }
     }
-    handleBackToList();
   };
 
   const getAdmin = async () => {
@@ -201,10 +289,10 @@ function ManageAdmin() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto h-150">
             <table className="table">
               {/* head */}
-              <thead>
+              <thead className="sticky top-0">
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัส</th>
@@ -222,13 +310,12 @@ function ManageAdmin() {
                       <th className="text-center">{index + 1}</th>
                       <td className="text-center">{item.admin_no}</td>
                       <td className="text-start">
-                        {item.admin_pname === "-"
+                        {(item.admin_pname === "-"
                           ? ""
-                          : item.admin_pname +
-                            " " +
-                            item.admin_name +
-                            " " +
-                            item.admin_sname}
+                          : item.admin_pname + " ") +
+                          item.admin_name +
+                          " " +
+                          item.admin_sname}
                       </td>
                       <td className="text-start">{item.admin_un}</td>
                       <td className="text-start flex justify-between items-center">
@@ -263,7 +350,10 @@ function ManageAdmin() {
                         >
                           แก้ไข
                         </button>
-                        <button className="btn btn-sm btn-error w-17">
+                        <button
+                          className="btn btn-sm btn-error w-17"
+                          onClick={() => handleDelete(item.admin_no)}
+                        >
                           ลบ
                         </button>
                       </td>
@@ -442,6 +532,7 @@ function ManageAdmin() {
                   value={formData.admin_un || ""}
                   onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกชื่อผู้ใช้"
+                  disabled={formType === "edit"}
                 />
               </div>
               <div>
