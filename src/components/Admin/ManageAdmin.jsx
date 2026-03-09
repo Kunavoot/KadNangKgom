@@ -205,6 +205,7 @@ function ManageAdmin() {
   };
 
   const getAdmin = async () => {
+    // ดึงข้อมูลผู้บริหาร
     setIsLoading(true);
     try {
       const response = await axios.get(
@@ -295,7 +296,7 @@ function ManageAdmin() {
               <thead className="sticky top-0">
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
-                  <th className="text-center w-[10%]">รหัส</th>
+                  <th className="text-center w-[10%]">รหัสผู้บริหาร</th>
                   <th className="text-start">ชื่อ-นามสกุล</th>
                   <th className="text-start w-[10%]">ชื่อผู้ใช้</th>
                   <th className="text-start w-[10%]">รหัสผ่าน</th>
@@ -389,14 +390,14 @@ function ManageAdmin() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">รหัส</span>
+                  <span className="label-text text-lg">รหัสผู้บริหาร</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
                   name="admin_no"
                   value={formData.admin_no || ""}
                   onChange={(e) => handleFormChange(e)}
-                  placeholder="ระบบจะกรอกรหัสอัตโนมัติ"
+                  placeholder="ระบบจะกรอกรหัสให้อัตโนมัติ"
                   disabled
                 />
               </div>

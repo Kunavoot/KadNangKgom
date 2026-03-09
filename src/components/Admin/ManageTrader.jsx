@@ -1,37 +1,47 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Loading from "../Loading";
+import axios from "axios";
+import { BuddhistDatePicker } from "../../utils/utils.jsx";
+import Swal from "sweetalert2";
 
 function ManageTrader() {
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [isForm, setIsFrom] = useState(false);
   const [formType, setFormType] = useState(""); // Add, Edit สำหรับจัดการฟอร์ม
+  const [visiblePasswordId, setVisiblePasswordId] = useState(null);
 
   // ข้อมูล
+  const [prefix, setPrefix] = useState([]);
   const [details, setDetails] = useState([]);
-  const [typeMembers, setTypeMembers] = useState([
-    {
-      "01": "สมาชิกทั่วไป",
-      "02": "สมาชิกพิเศษ",
-      "03": "สมาชิก VIP",
-    },
-  ]);
-  const [typeProducts, setTypeProducts] = useState([
-    {
-      "01": "สินค้าทั่วไป",
-      "02": "สินค้าพิเศษ",
-      "03": "สินค้า Premium",
-    },
-  ]);
+  const [typeMembers, setTypeMembers] = useState([]);
+  const [typeProducts, setTypeProducts] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    shop: "",
-    type_member: "",
-    type_product: "",
-    username: "",
-    password: "",
+    trader_no: "",
+    trader_mtype: "",
+    trader_ptype: "",
+    trader_pname: "",
+    trader_name: "",
+    trader_sname: "",
+    trader_shop: "",
+    trader_product: "",
+    trader_addr_product: "",
+    trader_addr: "",
+    trader_business: "",
+    trader_fsale: "",
+    trader_car: "",
+    trader_course: "",
+    trader_hobby: "",
+    trader_tel: "",
+    trader_line: "",
+    trader_facebook: "",
+    trader_pic_trader: "",
+    trader_pic_product: "",
+    trader_un: "",
+    trader_pw: "",
+    trader_date: "",
+    trader_status: "1", // 1 = ปกติ, 2 = ระงับ
   });
 
   const handleEdit = (item) => {
@@ -64,65 +74,76 @@ function ManageTrader() {
     } else if (formType === "edit" && selectedItem) {
       setDetails((prev) =>
         prev.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...formData } : item,
+          item.trader_no === selectedItem.trader_no
+            ? { ...item, ...formData }
+            : item,
         ),
       );
     }
     handleBackToList();
   };
 
-  const getTrader = () => {
+  const getTrader = async () => {
+    //ดึงข้อมูลผู้ค้า
     setIsLoading(true);
     try {
-      // ดึงข้อมูลผู้ค้าจาก API หรือฐานข้อมูล
-      setDetails([
-        {
-          id: "90000000001",
-          name: "นาย xxxxxx xxxxxx",
-          shop: "ร้าน xxxxxx",
-          type_member: "สมาชิกทั่วไป",
-          type_product: "สินค้าทั่วไป",
-          username: "admin01",
-          password: "123456",
-        },
-        {
-          id: "90000000002",
-          name: "นางสาว yyyyyy yyyyyy",
-          shop: "ร้าน yyyyyy",
-          type_member: "สมาชิกพิเศษ",
-          type_product: "สินค้าพิเศษ",
-          username: "admin02",
-          password: "abcdef",
-        },
-      ]);
-      setIsLoading(false);
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getTrader",
+      );
+      setDetails(response.data.data || []);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error fetching trader data:", error);
+      setDetails([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getTypeMembers = () => {
-    // ดึงข้อมูลประเภทสมาชิกจาก API หรือฐานข้อมูล
+  const getTypeMembers = async () => {
+    // ดึงข้อมูลประเภทสมาชิก
     setIsLoading(true);
     try {
-      setTypeMembers(["สมาชิกทั่วไป", "สมาชิกพิเศษ", "สมาชิก VIP"]);
-      setIsLoading(false);
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/system/getMemberType",
+      );
+      setTypeMembers(response.data.data || []);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error fetching type members:", error);
+      setTypeMembers([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getTypeProducts = () => {
-    // ดึงข้อมูลประเภทสินค้าจาก API หรือฐานข้อมูล
+  const getTypeProducts = async () => {
+    // ดึงข้อมูลประเภทสินค้า
     setIsLoading(true);
     try {
-      setTypeProducts(["สินค้าทั่วไป", "สินค้าพิเศษ", "สินค้า Premium"]);
-      setIsLoading(false);
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/system/getProductType",
+      );
+      setTypeProducts(response.data.data || []);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error fetching type products:", error);
+      setTypeProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getPrefix = async () => {
+    // ดึงข้อมูลคำนำหน้า
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/system/getPrefix",
+      );
+      setPrefix(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching prefix:", error);
+      setPrefix([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -130,30 +151,65 @@ function ManageTrader() {
     getTrader();
     getTypeMembers();
     getTypeProducts();
+    getPrefix();
   }, []);
 
   useEffect(() => {
     if (formType === "edit" && selectedItem) {
       setFormData({
-        id: selectedItem.id || "",
-        name: selectedItem.name || "",
-        shop: selectedItem.shop || "",
-        type_member: selectedItem.type_member || "",
-        type_product: selectedItem.type_product || "",
-        username: selectedItem.username || "",
-        password: selectedItem.password || "",
+        trader_no: selectedItem.trader_no || "",
+        trader_mtype: selectedItem.trader_mtype || "",
+        trader_ptype: selectedItem.trader_ptype || "",
+        trader_pname: selectedItem.trader_pname || "",
+        trader_name: selectedItem.trader_name || "",
+        trader_sname: selectedItem.trader_sname || "",
+        trader_shop: selectedItem.trader_shop || "",
+        trader_product: selectedItem.trader_product || "",
+        trader_addr_product: selectedItem.trader_addr_product || "",
+        trader_addr: selectedItem.trader_addr || "",
+        trader_business: selectedItem.trader_business || "",
+        trader_fsale: selectedItem.trader_fsale || "",
+        trader_car: selectedItem.trader_car || "",
+        trader_course: selectedItem.trader_course || "",
+        trader_hobby: selectedItem.trader_hobby || "",
+        trader_tel: selectedItem.trader_tel || "",
+        trader_line: selectedItem.trader_line || "",
+        trader_facebook: selectedItem.trader_facebook || "",
+        trader_pic_trader: selectedItem.trader_pic_trader || "",
+        trader_pic_product: selectedItem.trader_pic_product || "",
+        trader_un: selectedItem.trader_un || "",
+        trader_pw: selectedItem.trader_pw || "",
+        trader_date: selectedItem.trader_date || "",
+        trader_status: selectedItem.trader_status || "1",
       });
       return;
     }
     if (formType === "add") {
       setFormData({
-        id: "",
-        name: "",
-        shop: "",
-        type_member: "",
-        type_product: "",
-        username: "",
-        password: "",
+        trader_no: "",
+        trader_mtype: "",
+        trader_ptype: "",
+        trader_pname: "",
+        trader_name: "",
+        trader_sname: "",
+        trader_shop: "",
+        trader_product: "",
+        trader_addr_product: "",
+        trader_addr: "",
+        trader_business: "",
+        trader_fsale: "",
+        trader_car: "",
+        trader_course: "",
+        trader_hobby: "",
+        trader_tel: "",
+        trader_line: "",
+        trader_facebook: "",
+        trader_pic_trader: "",
+        trader_pic_product: "",
+        trader_un: "",
+        trader_pw: "",
+        trader_date: "",
+        trader_status: "1",
       });
     }
   }, [formType, selectedItem]);
@@ -181,7 +237,7 @@ function ManageTrader() {
               <thead>
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
-                  <th className="text-center w-[10%]">รหัส</th>
+                  <th className="text-center w-[10%]">รหัสผู้ค้า</th>
                   <th className="text-start">ชื่อร้าน</th>
                   <th className="text-start">ชื่อ-นามสกุล</th>
                   <th className="text-start">ประเภทสมาชิก</th>
@@ -195,15 +251,22 @@ function ManageTrader() {
                 {details.length > 0 ? (
                   // ถ้ามีข้อมูล ให้ map แถวออกมา
                   details.map((item, index) => (
-                    <tr key={item.id || index} className="hover:bg-gray-100">
+                    <tr key={item.trader_no} className="hover:bg-gray-100">
                       <th className="text-center">{index + 1}</th>
-                      <td className="text-center">{item.id}</td>
-                      <td className="text-start">{item.shop}</td>
-                      <td className="text-start">{item.name}</td>
-                      <td className="text-start">{item.type_member}</td>
-                      <td className="text-start">{item.type_product}</td>
-                      <td className="text-start">{item.username}</td>
-                      <td className="text-start">{item.password}</td>
+                      <td className="text-center">{item.trader_no}</td>
+                      <td className="text-start">{item.trader_shop}</td>
+                      <td className="text-start">
+                        {(item.trader_pname === "-"
+                          ? ""
+                          : item.trader_pname + " ") +
+                          item.trader_name +
+                          " " +
+                          item.trader_sname}
+                      </td>
+                      <td className="text-start">{item.trader_mtype_name}</td>
+                      <td className="text-start">{item.trader_ptype_name}</td>
+                      <td className="text-start">{item.trader_un}</td>
+                      <td className="text-start">{item.trader_pw}</td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-warning mr-2 w-17"
@@ -244,29 +307,18 @@ function ManageTrader() {
           </div>
 
           <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">รหัส</span>
+                  <span className="label-text text-lg">รหัสผู้ค้า</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="id"
-                  value={formData.id}
+                  name="trader_no"
+                  value={formData.trader_no}
                   onChange={handleFormChange}
-                  placeholder="กรอกรหัส"
-                />
-              </div>
-              <div>
-                <label className="label">
-                  <span className="label-text text-lg">ชื่อ-นามสกุล</span>
-                </label>
-                <input
-                  className="input input-bordered w-full"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleFormChange}
-                  placeholder="กรอกชื่อ-นามสกุล"
+                  placeholder="ระบบจะกรอกรหัสให้อัตโนมัติ"
+                  disabled
                 />
               </div>
               <div>
@@ -275,10 +327,67 @@ function ManageTrader() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="shop"
-                  value={formData.shop}
+                  name="trader_shop"
+                  value={formData.trader_shop}
                   onChange={handleFormChange}
                   placeholder="กรอกชื่อร้าน"
+                />
+              </div>
+              <div className="flex w-full gap-4">
+                <div className="flex flex-col w-1/4">
+                  <label className="label">
+                    <span className="label-text text-lg">คำนำหน้า</span>
+                  </label>
+                  <select
+                    className="select select-bordered w-full"
+                    name="trader_pname"
+                    value={formData.trader_pname}
+                    onChange={handleFormChange}
+                  >
+                    <option value="">เลือกคำนำหน้า</option>
+                    {prefix.map((item) => (
+                      <option key={item.id} value={item.short_th}>
+                        {item.title_th}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col w-3/4">
+                  <label className="label">
+                    <span className="label-text text-lg">ชื่อ</span>
+                  </label>
+                  <input
+                    className="input input-bordered w-full"
+                    name="trader_name"
+                    value={formData.trader_name}
+                    onChange={handleFormChange}
+                    placeholder="กรอกชื่อ"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">นามสกุล</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_sname"
+                  value={formData.trader_sname}
+                  onChange={handleFormChange}
+                  placeholder="กรอกนามสกุล"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">เบอร์โทรศัพท์</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_tel"
+                  type="tel"
+                  value={formData.trader_tel}
+                  onChange={handleFormChange}
+                  placeholder="กรอกเบอร์โทรศัพท์"
                 />
               </div>
               <div>
@@ -287,16 +396,18 @@ function ManageTrader() {
                 </label>
                 <select
                   className="select select-bordered w-full"
-                  name="type_member"
-                  value={formData.type_member}
+                  name="trader_mtype"
+                  value={formData.trader_mtype}
                   onChange={handleFormChange}
                 >
                   <option value="" disabled>
                     เลือกประเภทสมาชิก
                   </option>
-                  <option value="01">สมาชิกทั่วไป</option>
-                  <option value="02">สมาชิกพิเศษ</option>
-                  <option value="03">สมาชิก VIP</option>
+                  {typeMembers.map((type) => (
+                    <option key={type.mtype_id} value={type.mtype_id}>
+                      {type.mtype_name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -305,17 +416,192 @@ function ManageTrader() {
                 </label>
                 <select
                   className="select select-bordered w-full"
-                  name="type_product"
-                  value={formData.type_product}
+                  name="trader_ptype"
+                  value={formData.trader_ptype}
                   onChange={handleFormChange}
                 >
                   <option value="" disabled>
                     เลือกประเภทสินค้า
                   </option>
-                  <option value="01">สินค้าทั่วไป</option>
-                  <option value="02">สินค้าพิเศษ</option>
-                  <option value="03">สินค้า Premium</option>
+                  {typeProducts.map((type) => (
+                    <option key={type.ptype_id} value={type.ptype_id}>
+                      {type.ptype_name}
+                    </option>
+                  ))}
                 </select>
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ชื่อสินค้า</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_product"
+                  value={formData.trader_product}
+                  onChange={handleFormChange}
+                  placeholder="กรอกชื่อสินค้า"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-lg">ที่อยู่สินค้า</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_addr_product"
+                  value={formData.trader_addr_product}
+                  onChange={handleFormChange}
+                  placeholder="กรอกที่อยู่สินค้า"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-lg">ที่อยู่ผู้ค้า</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered w-full h-24"
+                  name="trader_addr"
+                  value={formData.trader_addr}
+                  onChange={handleFormChange}
+                  placeholder="กรอกที่อยู่ผู้ค้า"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ธุรกิจ</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_business"
+                  value={formData.trader_business}
+                  onChange={handleFormChange}
+                  placeholder="กรอกประเภทธุรกิจ"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">
+                    Flash Sale (ยอดขาย)
+                  </span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_fsale"
+                  value={formData.trader_fsale}
+                  onChange={handleFormChange}
+                  placeholder="กรอกยอดขาย Flash Sale"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">รถที่ใช้</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_car"
+                  value={formData.trader_car}
+                  onChange={handleFormChange}
+                  placeholder="เช่น กระบะ, มอเตอร์ไซค์"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">คอร์สที่เรียน</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_course"
+                  value={formData.trader_course}
+                  onChange={handleFormChange}
+                  placeholder="กรอกคอร์สที่เคยเรียน"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">งานอดิเรก</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_hobby"
+                  value={formData.trader_hobby}
+                  onChange={handleFormChange}
+                  placeholder="กรอกงานอดิเรก"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">Line ID</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_line"
+                  value={formData.trader_line}
+                  onChange={handleFormChange}
+                  placeholder="กรอก Line ID"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-lg">Facebook</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_facebook"
+                  value={formData.trader_facebook}
+                  onChange={handleFormChange}
+                  placeholder="กรอกลิงก์หรือชื่อ Facebook"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ชื่อผู้ใช้</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_un"
+                  value={formData.trader_un}
+                  onChange={handleFormChange}
+                  placeholder="กรอกชื่อผู้ใช้สำหรับเข้าระบบ"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">รหัสผ่าน</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="trader_pw"
+                  type="password"
+                  value={formData.trader_pw}
+                  onChange={handleFormChange}
+                  placeholder="กรอกรหัสผ่าน"
+                />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">สถานะ</span>
+                </label>
+                <select
+                  className="select select-bordered w-full"
+                  name="trader_status"
+                  value={formData.trader_status}
+                  onChange={handleFormChange}
+                >
+                  <option value="1">ปกติ</option>
+                  <option value="0">ระงับการใช้งาน</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">วันที่สมัคร</span>
+                </label>
+                <BuddhistDatePicker
+                  name="trader_date"
+                  value={formData.trader_date}
+                  onChange={(date) =>
+                    setFormData((prev) => ({ ...prev, trader_date: date }))
+                  }
+                />
               </div>
             </div>
 
