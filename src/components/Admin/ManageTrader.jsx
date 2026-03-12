@@ -299,7 +299,7 @@ function ManageTrader() {
               {formType === "edit" ? "แก้ไขผู้ค้า" : "เพิ่มผู้ค้า"}
             </div>
             <button
-              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
               onClick={handleBackToList}
             >
               ×
@@ -404,8 +404,8 @@ function ManageTrader() {
                     เลือกประเภทสมาชิก
                   </option>
                   {typeMembers.map((type) => (
-                    <option key={type.mtype_id} value={type.mtype_id}>
-                      {type.mtype_name}
+                    <option key={type.memtype_id} value={type.memtype_id}>
+                      {type.memtype_name}
                     </option>
                   ))}
                 </select>
@@ -444,14 +444,14 @@ function ManageTrader() {
               </div>
               <div className="md:col-span-2">
                 <label className="label">
-                  <span className="label-text text-lg">ที่อยู่สินค้า</span>
+                  <span className="label-text text-lg">แหล่งที่มาของสินค้า</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
                   name="trader_addr_product"
                   value={formData.trader_addr_product}
                   onChange={handleFormChange}
-                  placeholder="กรอกที่อยู่สินค้า"
+                  placeholder="กรอกแหล่งที่มาของสินค้า"
                 />
               </div>
               <div className="md:col-span-2">
@@ -468,14 +468,14 @@ function ManageTrader() {
               </div>
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">ธุรกิจ</span>
+                  <span className="label-text text-lg">วันที่เริ่มทำธุรกิจ</span>
                 </label>
-                <input
-                  className="input input-bordered w-full"
+                <BuddhistDatePicker
                   name="trader_business"
                   value={formData.trader_business}
-                  onChange={handleFormChange}
-                  placeholder="กรอกประเภทธุรกิจ"
+                  onChange={(date) =>
+                    setFormData((prev) => ({ ...prev, trader_business: date }))
+                  }
                 />
               </div>
               <div>
