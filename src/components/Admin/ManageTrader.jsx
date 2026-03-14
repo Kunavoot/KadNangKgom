@@ -162,7 +162,7 @@ function ManageTrader() {
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      cancelButtonColor: "#c2c2c2ff",
       confirmButtonText: "ลบ",
       cancelButtonText: "ยกเลิก",
     }).then(async (result) => {
@@ -394,7 +394,30 @@ function ManageTrader() {
                       <td className="text-start">{item.trader_mtype_name}</td>
                       <td className="text-start">{item.trader_ptype_name}</td>
                       <td className="text-start">{item.trader_un}</td>
-                      <td className="text-start">{item.trader_pw}</td>
+                      <td className="text-start flex justify-between items-center">
+                        {visiblePasswordId === item.trader_no
+                          ? item.trader_pw
+                          : "********"}
+                        <button
+                          type="button"
+                          className="btn btn-ghost h-10 btn-xs"
+                          onMouseDown={() =>
+                            setVisiblePasswordId(item.trader_no)
+                          }
+                          onMouseUp={() => setVisiblePasswordId(null)}
+                          onMouseLeave={() => setVisiblePasswordId(null)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="h-4 w-4"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 5c-5.5 0-9.6 3.7-11 7 1.4 3.3 5.5 7 11 7s9.6-3.7 11-7c-1.4-3.3-5.5-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                          </svg>
+                        </button>
+                      </td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-warning mr-2 w-17"
@@ -457,20 +480,20 @@ function ManageTrader() {
                   </div>
                   <div>
                     <label className="label">
-                      <span className="label-text text-lg">ชื่อร้าน</span>
+                      <span className="label-text text-lg">ชื่อร้านค้า</span>
                     </label>
                     <input
                       className="input input-bordered w-full"
                       name="trader_shop"
                       value={formData.trader_shop}
                       onChange={handleFormChange}
-                      placeholder="กรอกชื่อร้าน"
+                      placeholder="กรอกชื่อร้านค้า"
                     />
                   </div>
                   <div className="flex w-full gap-4">
                     <div className="flex flex-col w-1/4">
                       <label className="label">
-                        <span className="label-text text-lg">คำนำหน้า</span>
+                        <span className="label-text text-lg">คำนำหน้าชื่อ</span>
                       </label>
                       <select
                         className="select select-bordered w-full"
@@ -478,7 +501,7 @@ function ManageTrader() {
                         value={formData.trader_pname}
                         onChange={handleFormChange}
                       >
-                        <option value="">เลือกคำนำหน้า</option>
+                        <option value="">เลือกคำนำหน้าชื่อ</option>
                         {prefix.map((item) => (
                           <option key={item.id} value={item.short_th}>
                             {item.title_th}
@@ -566,14 +589,14 @@ function ManageTrader() {
                   </div>
                   <div>
                     <label className="label">
-                      <span className="label-text text-lg">ชื่อสินค้า</span>
+                      <span className="label-text text-lg">สินค้าที่ขาย</span>
                     </label>
                     <input
                       className="input input-bordered w-full"
                       name="trader_product"
                       value={formData.trader_product}
                       onChange={handleFormChange}
-                      placeholder="กรอกชื่อสินค้า"
+                      placeholder="กรอกสินค้าที่ขาย"
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -602,6 +625,18 @@ function ManageTrader() {
                       placeholder="กรอกที่อยู่ผู้ค้า"
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="label">
+                      <span className="label-text text-lg">สถานที่เคยขาย</span>
+                    </label>
+                    <input
+                      className="input input-bordered w-full"
+                      name="trader_fsale"
+                      value={formData.trader_fsale}
+                      onChange={handleFormChange}
+                      placeholder="กรอกสถานที่เคยขาย"
+                    />
+                  </div>
                   <div>
                     <label className="label">
                       <span className="label-text text-lg">
@@ -621,18 +656,6 @@ function ManageTrader() {
                   </div>
                   <div>
                     <label className="label">
-                      <span className="label-text text-lg">สถานที่เคยขาย</span>
-                    </label>
-                    <input
-                      className="input input-bordered w-full"
-                      name="trader_fsale"
-                      value={formData.trader_fsale}
-                      onChange={handleFormChange}
-                      placeholder="กรอกสถานที่เคยขาย"
-                    />
-                  </div>
-                  <div>
-                    <label className="label">
                       <span className="label-text text-lg">รถที่ใช้</span>
                     </label>
                     <input
@@ -645,26 +668,26 @@ function ManageTrader() {
                   </div>
                   <div>
                     <label className="label">
-                      <span className="label-text text-lg">คอร์สที่เรียน</span>
+                      <span className="label-text text-lg">การอบรมที่สนใจ</span>
                     </label>
                     <input
                       className="input input-bordered w-full"
                       name="trader_course"
                       value={formData.trader_course}
                       onChange={handleFormChange}
-                      placeholder="กรอกคอร์สที่เคยเรียน"
+                      placeholder="กรอกการอบรมที่สนใจ"
                     />
                   </div>
                   <div>
                     <label className="label">
-                      <span className="label-text text-lg">งานอดิเรก</span>
+                      <span className="label-text text-lg">กิจกรรมที่ชอบ</span>
                     </label>
                     <input
                       className="input input-bordered w-full"
                       name="trader_hobby"
                       value={formData.trader_hobby}
                       onChange={handleFormChange}
-                      placeholder="กรอกงานอดิเรก"
+                      placeholder="กรอกกิจกรรมที่ชอบ"
                     />
                   </div>
                   <div>
@@ -679,7 +702,7 @@ function ManageTrader() {
                       placeholder="กรอก Line ID"
                     />
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="label">
                       <span className="label-text text-lg">Facebook</span>
                     </label>
@@ -700,7 +723,8 @@ function ManageTrader() {
                       name="trader_un"
                       value={formData.trader_un}
                       onChange={handleFormChange}
-                      placeholder="กรอกชื่อผู้ใช้สำหรับเข้าระบบ"
+                      placeholder="กรอกชื่อผู้ใช้"
+                      disabled={formType === "edit"}
                     />
                   </div>
                   <div>
@@ -745,13 +769,10 @@ function ManageTrader() {
                 </div>
               </div>
 
-              {/* Right Column: Image Upload */}
               <div className="w-full lg:w-1/3 flex flex-col items-center gap-8">
-                {/* Trader Photo */}
-                <div className="w-full flex flex-col items-center gap-4">
-                  <div className="text-xl font-bold text-gray-700">
-                    รูปภาพผู้ค้า
-                  </div>
+                {/* รูปภาพผู้ค้า */}
+                <div className="w-8/10 flex flex-col items-center gap-4">
+                  <div className="text-xl text-gray-700">รูปภาพผู้ค้า</div>
                   <div
                     className="w-full aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 cursor-pointer hover:border-green-500 transition-colors"
                     onClick={() =>
@@ -801,10 +822,8 @@ function ManageTrader() {
                   </label>
                 </div>
 
-                <div className="w-full flex flex-col items-center gap-4">
-                  <div className="text-xl font-bold text-gray-700">
-                    รูปภาพสินค้า
-                  </div>
+                <div className="w-8/10 flex flex-col items-center gap-4">
+                  <div className="text-xl text-gray-700">รูปภาพสินค้า</div>
                   <div
                     className="w-full aspect-square border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 cursor-pointer hover:border-green-500 transition-colors"
                     onClick={() =>

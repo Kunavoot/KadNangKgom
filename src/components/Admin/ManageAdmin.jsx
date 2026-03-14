@@ -38,30 +38,43 @@ function ManageAdmin() {
     console.log("Editing id:", item);
   };
 
-  const handleDelete = async (admin_no) => {
-    setIsLoading(true);
-    try {
-      const response = await axios.delete(
-        import.meta.env.VITE_API_URL + "/admin/delAdmin/" + admin_no,
-      );
-      Swal.fire({
-        icon: "success",
-        title: response.data.message,
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#5bc06d",
-      });
-    } catch (error) {
-      console.error("Error deleting admin:", error);
-      Swal.fire({
-        icon: "error",
-        title: error.response.data.message,
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#5bc06d",
-      });
-    } finally {
-      setIsLoading(false);
-      getAdmin();
-    }
+  const handleDelete = (admin_no) => {
+    Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลผู้บริหารรายนี้?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#c2c2c2ff",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        try {
+          const response = await axios.delete(
+            import.meta.env.VITE_API_URL + "/admin/delAdmin/" + admin_no,
+          );
+          Swal.fire({
+            icon: "success",
+            title: response.data.message,
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } catch (error) {
+          console.error("Error deleting admin:", error);
+          Swal.fire({
+            icon: "error",
+            title: error.response?.data?.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } finally {
+          setIsLoading(false);
+          getAdmin();
+        }
+      }
+    });
   };
 
   const handleAdd = () => {
@@ -326,7 +339,6 @@ function ManageAdmin() {
                         <button
                           type="button"
                           className="btn btn-ghost h-10 btn-xs"
-                          aria-label="แสดงรหัสผ่าน"
                           onMouseDown={() =>
                             setVisiblePasswordId(item.admin_no)
                           }
@@ -436,14 +448,14 @@ function ManageAdmin() {
                 </div>
                 <div className="flex flex-col w-3/4">
                   <label className="label">
-                    <span className="label-text text-lg">ชื่อจริง</span>
+                    <span className="label-text text-lg">ชื่อ</span>
                   </label>
                   <input
                     className="input input-bordered w-full"
                     name="admin_name"
                     value={formData.admin_name || ""}
                     onChange={(e) => handleFormChange(e)}
-                    placeholder="กรอกชื่อจริง"
+                    placeholder="กรอกชื่อ"
                   />
                 </div>
               </div>
