@@ -41,7 +41,7 @@ function ManageTrader() {
     trader_un: "",
     trader_pw: "",
     trader_date: "",
-    trader_status: "1", // 1 = ปกติ, 2 = ระงับ
+    trader_status: "1", // 1 = กำลังค้าขาย, 0 = สิ้นสุดการค้า
   });
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -103,6 +103,7 @@ function ManageTrader() {
 
   const handleSave = async () => {
     setIsLoading(true);
+    if (!handleValidate()) return;
     try {
       const data = new FormData();
       // Append all text fields
@@ -148,7 +149,7 @@ function ManageTrader() {
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: error.response?.data?.message || "ไม่สามารถบันทึกข้อมูลได้",
+        text: error.response.data.message || "ไม่สามารถบันทึกข้อมูลได้",
       });
     } finally {
       setIsLoading(false);
@@ -175,9 +176,9 @@ function ManageTrader() {
           if (response.status === 200) {
             Swal.fire({
               icon: "success",
-              title: "ลบข้อมูลสำเร็จ",
-              showConfirmButton: false,
-              timer: 1500,
+              title: response.data.message || "ลบข้อมูลสำเร็จ",
+              confirmButtonText: "ตกลง",
+              confirmButtonColor: "#5bc06d",
             });
             getTrader();
           }
@@ -185,14 +186,110 @@ function ManageTrader() {
           console.error("Error deleting trader:", error);
           Swal.fire({
             icon: "error",
-            title: "เกิดข้อผิดพลาด",
-            text: "ไม่สามารถลบข้อมูลได้",
+            title: error.response.data.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
           });
         } finally {
           setIsLoading(false);
+          getTrader();
         }
       }
     });
+  };
+
+  const handleValidate = () => {
+    // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
+    for (const item in formData) {
+      if (item === "trader_no") {
+        continue;
+      }
+      if (!formData[item]) {
+        Swal.fire({
+          icon: "error",
+          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return false;
+      }
+    }
+    // เช็คเงื่อนไขบาง Form
+    if (!formData.trader_shop) {
+      Swal.fire({
+        icon: "error",
+        title: "กรุณากรอกชื่อร้านค้า",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_name.match(/^[ก-๙]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ค้าต้องเป็นภาษาไทยเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_sname.match(/^[ก-๙]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "นามสกุลผู้ค้าต้องเป็นภาษาไทยเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (
+      !formData.trader_tel.match(/^[0-9]+$/) ||
+      formData.trader_tel.length !== 10
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้นและมีความยาว 10 หลัก",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.trader_birth > formData.trader_date) {
+      Swal.fire({
+        icon: "error",
+        title: "วันเกิดต้องน้อยกว่าวันเข้ารับตำแหน่ง",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_un.match(/^[a-zA-Z0-9]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_pw.match(/^[a-zA-Z0-9]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    return true;
   };
 
   const getTrader = async () => {
@@ -359,10 +456,10 @@ function ManageTrader() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto h-150">
             <table className="table">
               {/* head */}
-              <thead>
+              <thead className="sticky top-0">
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัสผู้ค้า</th>
@@ -379,7 +476,7 @@ function ManageTrader() {
                 {details.length > 0 ? (
                   // ถ้ามีข้อมูล ให้ map แถวออกมา
                   details.map((item, index) => (
-                    <tr key={item.trader_no} className="hover:bg-gray-100">
+                    <tr key={item.trader_no} className="hover:bg-gray-100 h-10">
                       <th className="text-center">{index + 1}</th>
                       <td className="text-center">{item.trader_no}</td>
                       <td className="text-start">{item.trader_shop}</td>
@@ -501,7 +598,9 @@ function ManageTrader() {
                         value={formData.trader_pname}
                         onChange={handleFormChange}
                       >
-                        <option value="">เลือกคำนำหน้าชื่อ</option>
+                        <option value="" disabled>
+                          เลือกคำนำหน้าชื่อ
+                        </option>
                         {prefix.map((item) => (
                           <option key={item.id} value={item.short_th}>
                             {item.title_th}
@@ -750,8 +849,8 @@ function ManageTrader() {
                       value={formData.trader_status}
                       onChange={handleFormChange}
                     >
-                      <option value="1">ปกติ</option>
-                      <option value="0">ระงับการใช้งาน</option>
+                      <option value="1">กำลังค้าขาย</option>
+                      <option value="0">สิ้นสุดการค้าขาย</option>
                     </select>
                   </div>
                   <div>

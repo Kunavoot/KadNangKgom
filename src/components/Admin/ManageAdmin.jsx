@@ -31,7 +31,6 @@ function ManageAdmin() {
   });
 
   const handleEdit = (item) => {
-    // Logic สำหรับแก้ไขข้อมูลผู้บริหาร
     setFormType("edit");
     setIsFrom(true);
     setSelectedItem(item);
@@ -57,7 +56,7 @@ function ManageAdmin() {
           );
           Swal.fire({
             icon: "success",
-            title: response.data.message,
+            title: response.data.message || "ลบข้อมูลสำเร็จ",
             confirmButtonText: "ตกลง",
             confirmButtonColor: "#5bc06d",
           });
@@ -65,7 +64,7 @@ function ManageAdmin() {
           console.error("Error deleting admin:", error);
           Swal.fire({
             icon: "error",
-            title: error.response?.data?.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            title: error.response.data.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
             confirmButtonText: "ตกลง",
             confirmButtonColor: "#5bc06d",
           });
@@ -102,8 +101,7 @@ function ManageAdmin() {
     setFormData((prev) => ({ ...prev, admin_date: value }));
   };
 
-  const handleSave = async () => {
-    setIsLoading(true);
+  const handleValidate = () => {
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
       if (item === "admin_no") {
@@ -116,52 +114,59 @@ function ManageAdmin() {
           confirmButtonColor: "#5bc06d",
         });
         setIsLoading(false);
-        return;
-      }
-      if (!formData.admin_un.match(/^[a-zA-Z0-9]+$/)) {
-        Swal.fire({
-          icon: "error",
-          title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
-          confirmButtonText: "ตกลง",
-          confirmButtonColor: "#5bc06d",
-        });
-        setIsLoading(false);
-        return;
-      }
-      if (!formData.admin_pw.match(/^[a-zA-Z0-9]+$/)) {
-        Swal.fire({
-          icon: "error",
-          title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
-          confirmButtonText: "ตกลง",
-          confirmButtonColor: "#5bc06d",
-        });
-        setIsLoading(false);
-        return;
-      }
-      if (
-        !formData.admin_tel.match(/^[0-9]+$/) ||
-        formData.admin_tel.length !== 10
-      ) {
-        Swal.fire({
-          icon: "error",
-          title: "เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้นและมีความยาว 10 หลัก",
-          confirmButtonText: "ตกลง",
-          confirmButtonColor: "#5bc06d",
-        });
-        setIsLoading(false);
-        return;
-      }
-      if (formData.admin_birth > formData.admin_date) {
-        Swal.fire({
-          icon: "error",
-          title: "วันเกิดต้องน้อยกว่าวันเข้ารับตำแหน่ง",
-          confirmButtonText: "ตกลง",
-          confirmButtonColor: "#5bc06d",
-        });
-        setIsLoading(false);
-        return;
+        return false;
       }
     }
+    // เช็คเงื่อนไขบาง Form
+    if (!formData.admin_un.match(/^[a-zA-Z0-9]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.admin_pw.match(/^[a-zA-Z0-9]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (
+      !formData.admin_tel.match(/^[0-9]+$/) ||
+      formData.admin_tel.length !== 10
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้นและมีความยาว 10 หลัก",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.admin_birth > formData.admin_date) {
+      Swal.fire({
+        icon: "error",
+        title: "วันเกิดต้องน้อยกว่าวันเข้ารับตำแหน่ง",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    return true;
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    if (!handleValidate()) return;
     if (formType === "add") {
       try {
         const response = await axios.post(

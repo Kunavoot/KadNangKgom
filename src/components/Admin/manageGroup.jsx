@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Loading from "../Loading";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function ManageGroup() {
   // จัดการหน้าเว็บ
@@ -11,9 +13,9 @@ function ManageGroup() {
   const [details, setDetails] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    remark: "",
+    group_id: "",
+    group_name: "",
+    group_detail: "",
   });
 
   const handleEdit = (item) => {
@@ -21,6 +23,45 @@ function ManageGroup() {
     setIsFrom(true);
     setSelectedItem(item);
     console.log("Editing id:", item);
+  };
+
+  const handleDelete = (group_id) => {
+    Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลผู้บริหารรายนี้?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#c2c2c2ff",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        try {
+          const response = await axios.delete(
+            import.meta.env.VITE_API_URL + "/admin/delGroup/" + group_id,
+          );
+          Swal.fire({
+            icon: "success",
+            title: response.data.message || "ลบข้อมูลสำเร็จ",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } catch (error) {
+          console.error("Error deleting admin:", error);
+          Swal.fire({
+            icon: "error",
+            title: error.response.data.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } finally {
+          setIsLoading(false);
+          getGroup();
+        }
+      }
+    });
   };
 
   const handleAdd = () => {
@@ -40,7 +81,8 @@ function ManageGroup() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsLoading(true);
     if (formType === "add") {
       setDetails((prev) => [...prev, { ...formData }]);
     } else if (formType === "edit" && selectedItem) {
@@ -53,26 +95,19 @@ function ManageGroup() {
     handleBackToList();
   };
 
-  const getGroup = () => {
+  const getGroup = async () => {
+    // ดึงข้อมูลกลุ่มสังกัด
     setIsLoading(true);
     try {
-      // ดึงข้อมูลกลุ่มสังกัดจาก API หรือฐานข้อมูล
-      setDetails([
-        {
-          id: "01",
-          name: "ไก่",
-          remark: "กลุ่ม A เน้นขายสินค้าทั่วไป",
-        },
-        {
-          id: "02",
-          name: "ม้า",
-          remark: "กลุ่ม B เน้นขายสินค้าพิเศษ",
-        },
-      ]);
-      setIsLoading(false);
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getGroup",
+      );
+      setDetails(response.data.data || []);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error fetching group data:", error);
+      setDetails([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,17 +118,17 @@ function ManageGroup() {
   useEffect(() => {
     if (formType === "edit" && selectedItem) {
       setFormData({
-        id: selectedItem.id || "",
-        name: selectedItem.name || "",
-        remark: selectedItem.remark || "",
+        group_id: selectedItem.group_id || "",
+        group_name: selectedItem.group_name || "",
+        group_detail: selectedItem.group_detail || "",
       });
       return;
     }
     if (formType === "add") {
       setFormData({
-        id: "",
-        name: "",
-        remark: "",
+        group_id: "",
+        group_name: "",
+        group_detail: "",
       });
     }
   }, [formType, selectedItem]);
@@ -115,10 +150,10 @@ function ManageGroup() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto h-150">
             <table className="table">
               {/* head */}
-              <thead>
+              <thead className="sticky top-0">
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัส</th>
@@ -131,11 +166,11 @@ function ManageGroup() {
                 {details.length > 0 ? (
                   // ถ้ามีข้อมูล ให้ map แถวออกมา
                   details.map((item, index) => (
-                    <tr key={item.id || index} className="hover:bg-gray-100">
+                    <tr key={item.group_id} className="hover:bg-gray-100 h-10">
                       <th className="text-center">{index + 1}</th>
-                      <td className="text-center">{item.id}</td>
-                      <td className="text-start">{item.name}</td>
-                      <td className="text-start">{item.remark}</td>
+                      <td className="text-center">{item.group_id}</td>
+                      <td className="text-start">{item.group_name}</td>
+                      <td className="text-start">{item.group_detail}</td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-warning mr-2 w-17"
@@ -168,7 +203,7 @@ function ManageGroup() {
               {formType === "edit" ? "แก้ไขกลุ่มสังกัด" : "เพิ่มกลุ่มสังกัด"}
             </div>
             <button
-              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
               onClick={handleBackToList}
             >
               ×
@@ -176,15 +211,15 @@ function ManageGroup() {
           </div>
 
           <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 gap-y-4">
               <div>
                 <label className="label">
                   <span className="label-text text-lg">รหัส</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="id"
-                  value={formData.id}
+                  name="group_id"
+                  value={formData.group_id}
                   onChange={handleFormChange}
                   placeholder="กรอกรหัส"
                 />
@@ -195,20 +230,20 @@ function ManageGroup() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="name"
-                  value={formData.name}
+                  name="group_name"
+                  value={formData.group_name}
                   onChange={handleFormChange}
                   placeholder="กรอกชื่อกลุ่มสังกัด"
                 />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="label">
                   <span className="label-text text-lg">รายละเอียด</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="remark"
-                  value={formData.remark}
+                  name="group_detail"
+                  value={formData.group_detail}
                   onChange={handleFormChange}
                   placeholder="กรอกรายละเอียด"
                 />
