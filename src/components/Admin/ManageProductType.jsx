@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loading from "../Loading";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function ManageMemberType() {
   // จัดการหน้าเว็บ
@@ -11,9 +13,9 @@ function ManageMemberType() {
   const [details, setDetails] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    remark: "",
+    ptype_id: "",
+    ptype_name: "",
+    ptype_detail: "",
   });
 
   const handleEdit = (item) => {
@@ -28,6 +30,45 @@ function ManageMemberType() {
     setSelectedItem(null);
   };
 
+  const handleDelete = (ptype_id) => {
+    Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลประเภทสินค้า",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#c2c2c2ff",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        try {
+          const response = await axios.delete(
+            import.meta.env.VITE_API_URL + "/admin/delProductType/" + ptype_id,
+          );
+          Swal.fire({
+            icon: "success",
+            title: response.data.message || "ลบข้อมูลสำเร็จ",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } catch (error) {
+          console.error("Error deleting product type:", error);
+          Swal.fire({
+            icon: "error",
+            title: error.response.data.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } finally {
+          getProductType();
+          setIsLoading(false);
+        }
+      }
+    });
+  };  
+
   const handleBackToList = () => {
     setIsFrom(false);
     setFormType("");
@@ -39,43 +80,94 @@ function ManageMemberType() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
+  const handleValidate = () => {
+    // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
+    for (const item in formData) {
+      console.log(item);
+      if (item === "ptype_id") {
+        continue;
+      } else if (formData[item] === "") {
+        Swal.fire({
+          icon: "error",
+          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!handleValidate()) return;
+    setIsLoading(true);
     if (formType === "add") {
-      setDetails((prev) => [...prev, { ...formData }]);
+      try {
+        const response = await axios.post(
+          import.meta.env.VITE_API_URL + "/admin/addProductType",
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error adding product type:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message || "เกิดข้อผิดพลาดในการเพิ่มข้อมูล",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        getProductType();
+        setIsLoading(false);
+      }
     } else if (formType === "edit" && selectedItem) {
-      setDetails((prev) =>
-        prev.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...formData } : item,
-        ),
-      );
+      try {
+        const response = await axios.put(
+          import.meta.env.VITE_API_URL + "/admin/editProductType/" + selectedItem.ptype_id,
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error editing product type:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message || "เกิดข้อผิดพลาดในการแก้ไขข้อมูล",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        getProductType();
+        setIsLoading(false);
+      }
     }
     handleBackToList();
   };
 
-  const getProductType = () => {
+  const getProductType = async () => {
+    // ดึงข้อมูลประเภทสินค้า
     setIsLoading(true);
     try {
-      setDetails([
-        {
-          id: "01",
-          name: "อาหาร",
-          remark: "ขายอาหาร",
-        },
-        {
-          id: "02",
-          name: "เสื้อผ้า",
-          remark: "ขายเสื้อผ้า",
-        },
-        {
-          id: "03",
-          name: "เครื่องดื่ม",
-          remark: "ขายเครื่องดื่ม",
-        },
-      ]);
-      setIsLoading(false);
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getProductType",
+      );
+      setDetails(response.data.data || []);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error fetching product type data:", error);
+      setDetails([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,17 +178,17 @@ function ManageMemberType() {
   useEffect(() => {
     if (formType === "edit" && selectedItem) {
       setFormData({
-        id: selectedItem.id || "",
-        name: selectedItem.name || "",
-        remark: selectedItem.remark || "",
+        ptype_id: selectedItem.ptype_id || "",
+        ptype_name: selectedItem.ptype_name || "",
+        ptype_detail: selectedItem.ptype_detail || "",
       });
       return;
     }
     if (formType === "add") {
       setFormData({
-        id: "",
-        name: "",
-        remark: "",
+        ptype_id: "",
+        ptype_name: "",
+        ptype_detail: "",
       });
     }
   }, [formType, selectedItem]);
@@ -134,11 +226,11 @@ function ManageMemberType() {
                 {details.length > 0 ? (
                   // ถ้ามีข้อมูล ให้ map แถวออกมา
                   details.map((item, index) => (
-                    <tr key={item.id || index} className="hover:bg-gray-100">
+                    <tr key={item.ptype_id} className="hover:bg-gray-100">
                       <th className="text-center">{index + 1}</th>
-                      <td className="text-center">{item.id}</td>
-                      <td className="text-start">{item.name}</td>
-                      <td className="text-start">{item.remark}</td>
+                      <td className="text-center">{item.ptype_id}</td>
+                      <td className="text-start">{item.ptype_name}</td>
+                      <td className="text-start">{item.ptype_detail}</td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-warning mr-2 w-17"
@@ -146,7 +238,9 @@ function ManageMemberType() {
                         >
                           แก้ไข
                         </button>
-                        <button className="btn btn-sm btn-error w-17">
+                        <button className="btn btn-sm btn-error w-17"
+                          onClick={() => handleDelete(item.ptype_id)}
+                        >
                           ลบ
                         </button>
                       </td>
@@ -168,11 +262,11 @@ function ManageMemberType() {
         <div className="border border-gray-200 rounded-lg shadow-lg overflow-hidden">
           <div className="bg-[#8EEA8B] px-6 py-4 flex items-center justify-between">
             <div className="text-3xl font-bold text-green-800">
-              {formType === "edit" ? "แก้ไขประเภทสมาชิก" : "เพิ่มประเภทสมาชิก"}
+              {formType === "edit" ? "แก้ไขประเภทสินค้า" : "เพิ่มประเภทสินค้า"}
             </div>
             <button
-              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
-              onClick={handleBackToList}
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
+              onClick={() => handleBackToList()}
             >
               ×
             </button>
@@ -186,22 +280,23 @@ function ManageMemberType() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="id"
-                  value={formData.id}
+                  name="ptype_id"
+                  value={formData.ptype_id}
                   onChange={handleFormChange}
-                  placeholder="กรอกรหัส"
+                  placeholder="ระบบจะกรอกรหัสให้อัตโนมัติ"
+                  disabled
                 />
               </div>
               <div>
                 <label className="label">
-                  <span className="label-text text-lg">ประเภทสมาชิก</span>
+                  <span className="label-text text-lg">ประเภทสินค้า</span>
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="name"
-                  value={formData.name}
+                  name="ptype_name"
+                  value={formData.ptype_name}
                   onChange={handleFormChange}
-                  placeholder="กรอกประเภทสมาชิก"
+                  placeholder="กรอกประเภทสินค้า"
                 />
               </div>
               <div>
@@ -210,8 +305,8 @@ function ManageMemberType() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="remark"
-                  value={formData.remark}
+                  name="ptype_detail"
+                  value={formData.ptype_detail}
                   onChange={handleFormChange}
                   placeholder="กรอกรายละเอียด"
                 />
