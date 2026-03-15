@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Loading from "../Loading";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-function ManageMemberType() {
+function ManageProductType() {
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [isForm, setIsFrom] = useState(false);
@@ -334,4 +334,4 @@ function ManageMemberType() {
   );
 }
 
-export default ManageMemberType;
+export default ManageProductType;

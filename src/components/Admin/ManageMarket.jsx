@@ -1,97 +1,29 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Loading from "../Loading";
-
-const initialGroups = [
-  {
-    id: "g1",
-    name: "ไก่",
-    totalSlots: 5,
-    rentedSlots: 2,
-    stalls: [
-      {
-        stallId: "01001",
-        size: "4 x 4 ม.",
-        pricePerDay: "50.00",
-        location: "ข้างบกี",
-        status: "เช่าแล้ว",
-      },
-      {
-        stallId: "01002",
-        size: "4 x 4 ม.",
-        pricePerDay: "50.00",
-        location: "ข้างบกี",
-        status: "เช่าแล้ว",
-      },
-      {
-        stallId: "01003",
-        size: "4 x 4 ม.",
-        pricePerDay: "50.00",
-        location: "ข้างบกี",
-        status: "ว่าง",
-      },
-      {
-        stallId: "01004",
-        size: "4 x 4 ม.",
-        pricePerDay: "50.00",
-        location: "ข้างบกี",
-        status: "ว่าง",
-      },
-      {
-        stallId: "01005",
-        size: "4 x 4 ม.",
-        pricePerDay: "50.00",
-        location: "ข้างบกี",
-        status: "ปรับปรุง",
-      },
-    ],
-  },
-  {
-    id: "g2",
-    name: "ม้า",
-    totalSlots: 5,
-    rentedSlots: 2,
-    stalls: [],
-  },
-  {
-    id: "g3",
-    name: "หนอน",
-    totalSlots: 5,
-    rentedSlots: 2,
-    stalls: [],
-  },
-  {
-    id: "g4",
-    name: "นก",
-    totalSlots: 5,
-    rentedSlots: 2,
-    stalls: [],
-  },
-  {
-    id: "g5",
-    name: "ปลา",
-    totalSlots: 5,
-    rentedSlots: 2,
-    stalls: [],
-  },
-];
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function ManageMarket() {
-  const [isLoading] = useState(false);
-  const [groups, setGroups] = useState(initialGroups);
-  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  // จัดการหน้าเว็บ
+  const [isLoading, setIsLoading] = useState(false);
   const [isForm, setIsForm] = useState(false);
   const [formType, setFormType] = useState("");
+
+  // ข้อมูล
+  const [groups, setGroups] = useState([]);
+  const [stalls, setStalls] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [selectedStall, setSelectedStall] = useState(null);
   const [formData, setFormData] = useState({
-    stallId: "",
-    size: "",
-    pricePerDay: "",
+    market_id: "",
+    market_area: "",
+    market_price: "",
     location: "",
     status: "ว่าง",
   });
 
   const selectedGroup = useMemo(
-    () => groups.find((group) => group.id === selectedGroupId) || null,
+    () => groups.find((group) => group.group_id === selectedGroupId) || null,
     [groups, selectedGroupId],
   );
 
@@ -100,6 +32,7 @@ function ManageMarket() {
     setIsForm(false);
     setFormType("");
     setSelectedStall(null);
+    getMarket_Detail(groupId);
   };
 
   const handleBackToSummary = () => {
@@ -177,10 +110,48 @@ function ManageMarket() {
     handleBackToDetail();
   };
 
+  const getMarket_Summary = async () => {
+    // ดึงข้อมูลภาพรวมตลาด
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getMarket_Summary",
+      );
+      setGroups(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching market summary:", error);
+      setGroups([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getMarket_Detail = async (groupId) => {
+    // ดึงข้อมูลรายละเอียดตลาด
+    const targetId = groupId;
+    if (!targetId) return;
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getMarket_Detail/" + targetId,
+      );
+      setStalls(response.data.data || []);
+    } catch (error) {
+      console.error("Error fetching market detail:", error);
+      setStalls([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getMarket_Summary();
+  }, []);
+
   return (
     <>
       {isLoading && <Loading />}
-      {!selectedGroup && (
+      {!selectedGroupId && (
         <>
           <div className="flex flex-row justify-between py-4">
             <div className="text-2xl font-bold">จัดการเตรียมพื้นที่ตลาด</div>
@@ -189,26 +160,26 @@ function ManageMarket() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {groups.map((group) => (
               <button
-                key={group.id}
+                key={group.group_id}
                 className="bg-[#D9F7C9] border border-[#CDEEC1] shadow-sm p-4 h-[45] cursor-pointer text-center flex flex-col justify-between hover:shadow-md transition"
-                onClick={() => handleSelectGroup(group.id)}
+                onClick={() => handleSelectGroup(group.group_id)}
               >
                 <div>
                   <div className="text-sm text-gray-700">กลุ่ม</div>
-                  <div className="text-2xl font-semibold">{group.name}</div>
+                  <div className="text-2xl font-semibold">{group.group_name}</div>
                 </div>
                 <div className="flex items-center justify-between pt-4">
                   <div className="flex-1">
                     <div className="text-sm text-gray-700">จำนวนล็อค</div>
                     <div className="text-2xl font-semibold">
-                      {group.totalSlots}
+                      {group.total_stall}
                     </div>
                   </div>
                   <div className="w-px h-10 bg-[#7CCF7B]" />
                   <div className="flex-1">
                     <div className="text-sm text-gray-700">เช่าแล้ว</div>
                     <div className="text-2xl font-semibold">
-                      {group.rentedSlots}
+                      {group.total_rented}
                     </div>
                   </div>
                 </div>
@@ -218,7 +189,7 @@ function ManageMarket() {
         </>
       )}
 
-      {selectedGroup && !isForm && (
+      {selectedGroupId && !isForm && (
         <>
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
@@ -241,18 +212,18 @@ function ManageMarket() {
           <div className="flex flex-wrap gap-6 pb-6">
             <div className="bg-[#89E989] shadow-md w-[140px] h-[120px] flex flex-col items-center justify-center">
               <div className="text-sm font-medium">กลุ่ม</div>
-              <div className="text-2xl font-semibold">{selectedGroup.name}</div>
+              <div className="text-2xl font-semibold">{selectedGroup.group_name}</div>
             </div>
             <div className="bg-[#89E989] shadow-md w-[140px] h-[120px] flex flex-col items-center justify-center">
               <div className="text-sm font-medium">จำนวนล็อค</div>
               <div className="text-2xl font-semibold">
-                {selectedGroup.totalSlots}
+                {selectedGroup.total_stall}
               </div>
             </div>
             <div className="bg-[#89E989] shadow-md w-[140px] h-[120px] flex flex-col items-center justify-center">
               <div className="text-sm font-medium">เช่าแล้ว</div>
               <div className="text-2xl font-semibold">
-                {selectedGroup.rentedSlots}
+                {selectedGroup.total_rented}
               </div>
             </div>
           </div>
@@ -271,29 +242,33 @@ function ManageMarket() {
                 </tr>
               </thead>
               <tbody>
-                {selectedGroup.stalls.length > 0 ? (
-                  selectedGroup.stalls.map((stall, index) => (
+                {stalls.length > 0 ? (
+                  stalls.map((stall, index) => (
                     <>
                       <tr
-                        key={stall.stallId || index}
+                        key={stall.market_id || index}
                         className="hover:bg-gray-100"
                       >
                         <th className="text-center">{index + 1}</th>
-                        <td className="text-center">{stall.stallId}</td>
-                        <td className="text-center">{stall.size}</td>
-                        <td className="text-center">{stall.pricePerDay}</td>
-                        <td className="text-center">{stall.location}</td>
+                        <td className="text-center">{stall.market_id}</td>
+                        <td className="text-center">{stall.market_area}</td>
+                        <td className="text-center">{stall.market_price}</td>
+                        <td className="text-center">{stall.market_addr}</td>
                         <td className="text-center">
                           <span
                             className={
-                              stall.status === "ว่าง"
+                              stall.market_status === "0"
                                 ? "badge badge-success text-center"
-                                : stall.status === "เช่าแล้ว"
+                                : stall.market_status === "1"
                                   ? "badge badge-error text-center"
                                   : "badge badge-warning text-center"
                             }
                           >
-                            {stall.status}
+                            {stall.market_status === "0"
+                              ? "ว่าง"
+                              : stall.market_status === "1"
+                                ? "เช่าแล้ว"
+                                : ""}
                           </span>
                         </td>
                         <td className="text-center">
@@ -305,7 +280,7 @@ function ManageMarket() {
                           </button>
                           <button
                             className="btn btn-sm btn-error w-17"
-                            onClick={() => handleDelete(stall.stallId)}
+                            onClick={() => handleDelete(stall.market_id)}
                           >
                             ลบ
                           </button>
@@ -326,7 +301,7 @@ function ManageMarket() {
         </>
       )}
 
-      {selectedGroup && isForm && (
+      {selectedGroupId && isForm && (
         <div className="border border-gray-200 rounded-lg shadow-lg overflow-hidden">
           <div className="bg-[#8EEA8B] px-6 py-4 flex items-center justify-between">
             <div className="text-3xl font-bold text-green-800">
