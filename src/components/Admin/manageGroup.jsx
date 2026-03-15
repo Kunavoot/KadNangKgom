@@ -137,23 +137,20 @@ function ManageGroup() {
   };
 
   const handleValidate = () => {
-    if (formData.group_name === "") {
-      Swal.fire({
-        icon: "error",
-        title: "กรุณากรอกชื่อกลุ่มสังกัด",
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#5bc06d",
-      });
-      return false;
-    }
-    if (formData.group_detail === "") {
-      Swal.fire({
-        icon: "error",
-        title: "กรุณากรอกรายละเอียด",
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#5bc06d",
-      });
-      return false;
+    // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
+    for (const item in formData) {
+      if (item === "group_id") {
+        continue;
+      } else if (formData[item] === "") {
+        Swal.fire({
+          icon: "error",
+          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return false;
+      }
     }
     return true;
   };  
@@ -269,7 +266,7 @@ function ManageGroup() {
             </div>
             <button
               className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
-              onClick={handleBackToList}
+              onClick={() => handleBackToList()}
             >
               ×
             </button>
@@ -284,9 +281,9 @@ function ManageGroup() {
                 <input
                   className="input input-bordered w-full"
                   name="group_id"
-                  value={formData.group_id}
-                  onChange={handleFormChange}
-                  placeholder="กรอกรหัส"
+                  value={formData.group_id || ""}
+                  onChange={(e) => handleFormChange(e)}
+                  placeholder="ระบบจะกรอกรหัสให้อัตโนมัติ"
                   disabled
                 />
               </div>
@@ -297,8 +294,8 @@ function ManageGroup() {
                 <input
                   className="input input-bordered w-full"
                   name="group_name"
-                  value={formData.group_name}
-                  onChange={handleFormChange}
+                  value={formData.group_name || ""}
+                  onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกชื่อกลุ่มสังกัด"
                 />
               </div>
@@ -309,8 +306,8 @@ function ManageGroup() {
                 <input
                   className="input input-bordered w-full"
                   name="group_detail"
-                  value={formData.group_detail}
-                  onChange={handleFormChange}
+                  value={formData.group_detail || ""}
+                  onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกรายละเอียด"
                 />
               </div>

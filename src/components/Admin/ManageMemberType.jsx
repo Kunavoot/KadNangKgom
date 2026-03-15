@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loading from "../Loading";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function ManageMemberType() {
   // จัดการหน้าเว็บ
@@ -11,9 +13,9 @@ function ManageMemberType() {
   const [details, setDetails] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    remark: "",
+    memtype_id: "",
+    memtype_name: "",
+    memtype_detail: "",
   });
 
   const handleEdit = (item) => {
@@ -28,6 +30,45 @@ function ManageMemberType() {
     setSelectedItem(null);
   };
 
+  const handleDelete = (memtype_id) => {
+    Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลประเภทสมาชิกรายนี้?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#c2c2c2ff",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsLoading(true);
+        try {
+          const response = await axios.delete(
+            import.meta.env.VITE_API_URL + "/admin/delMemberType/" + memtype_id,
+          );
+          Swal.fire({
+            icon: "success",
+            title: response.data.message || "ลบข้อมูลสำเร็จ",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } catch (error) {
+          console.error("Error deleting member type:", error);
+          Swal.fire({
+            icon: "error",
+            title: error.response.data.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            confirmButtonText: "ตกลง",
+            confirmButtonColor: "#5bc06d",
+          });
+        } finally {
+          setIsLoading(false);
+          getMemberType();
+        }
+      }
+    });
+  }
+
   const handleBackToList = () => {
     setIsFrom(false);
     setFormType("");
@@ -39,43 +80,94 @@ function ManageMemberType() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!handleValidate()) return;
+    setIsLoading(true);
     if (formType === "add") {
-      setDetails((prev) => [...prev, { ...formData }]);
+      try {
+        const response = await axios.post(
+          import.meta.env.VITE_API_URL + "/admin/addMemberType",
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error adding member type:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message || "เกิดข้อผิดพลาดในการเพิ่มข้อมูล",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        setIsLoading(false);
+        getMemberType();
+      }
     } else if (formType === "edit" && selectedItem) {
-      setDetails((prev) =>
-        prev.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...formData } : item,
-        ),
-      );
+      try {
+        const response = await axios.put(
+          import.meta.env.VITE_API_URL + "/admin/editMemberType/" + selectedItem.memtype_id,
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message,
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error editing member type:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message || "เกิดข้อผิดพลาดในการแก้ไขข้อมูล",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        setIsLoading(false);
+        getMemberType();
+      }
     }
     handleBackToList();
   };
 
-  const getMemberType = () => {
+  const handleValidate = () => {
+    // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
+    for (const item in formData) {
+      console.log(item);
+      if (item === "memtype_id") {
+        continue;
+      } else if (formData[item] === "") {
+        Swal.fire({
+          icon: "error",
+          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        setIsLoading(false);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const getMemberType = async () => {
+    // ดึงข้อมูลประเภทสมาชิก
     setIsLoading(true);
     try {
-      setDetails([
-        {
-          id: "01",
-          name: "สมาชิกประจำ",
-          remark: "ผู้ค้าที่มาขายประจำทุกวันเสาร์-อาทิตย์",
-        },
-        {
-          id: "02",
-          name: "สมาชิกวันเสาร์",
-          remark: "ผู้ค้าที่มาขายประจำทุกวันเสาร์",
-        },
-        {
-          id: "03",
-          name: "สมาชิกวันอาทิตย์",
-          remark: "ผู้ค้าที่มาขายประจำทุกวันอาทิตย์",
-        },
-      ]);
-      setIsLoading(false);
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getMemberType",
+      );
+      setDetails(response.data.data || []);
     } catch (error) {
-      setIsLoading(false);
       console.error("Error fetching member type data:", error);
+      setDetails([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -86,17 +178,17 @@ function ManageMemberType() {
   useEffect(() => {
     if (formType === "edit" && selectedItem) {
       setFormData({
-        id: selectedItem.id || "",
-        name: selectedItem.name || "",
-        remark: selectedItem.remark || "",
+        memtype_id: selectedItem.memtype_id || "",
+        memtype_name: selectedItem.memtype_name || "",
+        memtype_detail: selectedItem.memtype_detail || "",
       });
       return;
     }
     if (formType === "add") {
       setFormData({
-        id: "",
-        name: "",
-        remark: "",
+        memtype_id: "",
+        memtype_name: "",
+        memtype_detail: "",
       });
     }
   }, [formType, selectedItem]);
@@ -118,10 +210,10 @@ function ManageMemberType() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto h-150">
             <table className="table">
               {/* head */}
-              <thead>
+              <thead className="sticky top-0">
                 <tr className="bg-[#71FF7A]">
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัส</th>
@@ -134,11 +226,14 @@ function ManageMemberType() {
                 {details.length > 0 ? (
                   // ถ้ามีข้อมูล ให้ map แถวออกมา
                   details.map((item, index) => (
-                    <tr key={item.id || index} className="hover:bg-gray-100">
+                    <tr
+                      key={item.id || index}
+                      className="hover:bg-gray-100 h-10"
+                    >
                       <th className="text-center">{index + 1}</th>
-                      <td className="text-center">{item.id}</td>
-                      <td className="text-start">{item.name}</td>
-                      <td className="text-start">{item.remark}</td>
+                      <td className="text-center">{item.memtype_id}</td>
+                      <td className="text-start">{item.memtype_name}</td>
+                      <td className="text-start">{item.memtype_detail}</td>
                       <td className="text-center">
                         <button
                           className="btn btn-sm btn-warning mr-2 w-17"
@@ -146,7 +241,10 @@ function ManageMemberType() {
                         >
                           แก้ไข
                         </button>
-                        <button className="btn btn-sm btn-error w-17">
+                        <button
+                          className="btn btn-sm btn-error w-17"
+                          onClick={() => handleDelete(item.memtype_id)}
+                        >
                           ลบ
                         </button>
                       </td>
@@ -171,8 +269,8 @@ function ManageMemberType() {
               {formType === "edit" ? "แก้ไขประเภทสมาชิก" : "เพิ่มประเภทสมาชิก"}
             </div>
             <button
-              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
-              onClick={handleBackToList}
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
+              onClick={() => handleBackToList()}
             >
               ×
             </button>
@@ -186,10 +284,11 @@ function ManageMemberType() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="id"
-                  value={formData.id}
-                  onChange={handleFormChange}
-                  placeholder="กรอกรหัส"
+                  name="memtype_id"
+                  value={formData.memtype_id || ""}
+                  onChange={(e) => handleFormChange(e)}
+                  placeholder="ระบบจะกรอกรหัสให้อัตโนมัติ"
+                  disabled
                 />
               </div>
               <div>
@@ -198,9 +297,9 @@ function ManageMemberType() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleFormChange}
+                  name="memtype_name"
+                  value={formData.memtype_name || ""}
+                  onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกประเภทสมาชิก"
                 />
               </div>
@@ -210,9 +309,9 @@ function ManageMemberType() {
                 </label>
                 <input
                   className="input input-bordered w-full"
-                  name="remark"
-                  value={formData.remark}
-                  onChange={handleFormChange}
+                  name="memtype_detail"
+                  value={formData.memtype_detail || ""}
+                  onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกรายละเอียด"
                 />
               </div>

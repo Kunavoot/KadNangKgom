@@ -159,7 +159,7 @@ function ManageTrader() {
   const handleDelete = (id) => {
     Swal.fire({
       title: "ยืนยันการลบ",
-      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้?",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลผู้ค้ารายนี้?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -551,7 +551,7 @@ function ManageTrader() {
             </div>
             <button
               className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
-              onClick={handleBackToList}
+              onClick={() => handleBackToList()}
             >
               ×
             </button>
