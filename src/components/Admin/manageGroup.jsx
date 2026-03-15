@@ -82,18 +82,81 @@ function ManageGroup() {
   };
 
   const handleSave = async () => {
+    if (!handleValidate()) return;
     setIsLoading(true);
     if (formType === "add") {
-      setDetails((prev) => [...prev, { ...formData }]);
+      try {
+        const response = await axios.post(
+          import.meta.env.VITE_API_URL + "/admin/addGroup",
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message || "เพิ่มข้อมูลสำเร็จ",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error adding admin:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message || "เกิดข้อผิดพลาดในการเพิ่มข้อมูล",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        setIsLoading(false);
+        getGroup();
+      }
     } else if (formType === "edit" && selectedItem) {
-      setDetails((prev) =>
-        prev.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...formData } : item,
-        ),
-      );
+      try {
+        const response = await axios.put(
+          import.meta.env.VITE_API_URL + "/admin/editGroup/" + formData.group_id,
+          formData,
+        );
+        Swal.fire({
+          icon: "success",
+          title: response.data.message || "แก้ไขข้อมูลสำเร็จ",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } catch (error) {
+        console.error("Error editing admin:", error);
+        Swal.fire({
+          icon: "error",
+          title: error.response.data.message || "เกิดข้อผิดพลาดในการแก้ไขข้อมูล",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+      } finally {
+        setIsLoading(false);
+        getGroup();
+      }
     }
     handleBackToList();
   };
+
+  const handleValidate = () => {
+    if (formData.group_name === "") {
+      Swal.fire({
+        icon: "error",
+        title: "กรุณากรอกชื่อกลุ่มสังกัด",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      return false;
+    }
+    if (formData.group_detail === "") {
+      Swal.fire({
+        icon: "error",
+        title: "กรุณากรอกรายละเอียด",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      return false;
+    }
+    return true;
+  };  
 
   const getGroup = async () => {
     // ดึงข้อมูลกลุ่มสังกัด
@@ -178,7 +241,9 @@ function ManageGroup() {
                         >
                           แก้ไข
                         </button>
-                        <button className="btn btn-sm btn-error w-17">
+                        <button className="btn btn-sm btn-error w-17"
+                          onClick={() => handleDelete(item.group_id)}
+                        >
                           ลบ
                         </button>
                       </td>
@@ -222,6 +287,7 @@ function ManageGroup() {
                   value={formData.group_id}
                   onChange={handleFormChange}
                   placeholder="กรอกรหัส"
+                  disabled
                 />
               </div>
               <div>

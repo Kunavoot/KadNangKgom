@@ -165,8 +165,8 @@ function ManageAdmin() {
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
     if (!handleValidate()) return;
+    setIsLoading(true);
     if (formType === "add") {
       try {
         const response = await axios.post(

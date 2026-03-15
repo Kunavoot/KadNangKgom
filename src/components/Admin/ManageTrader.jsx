@@ -102,8 +102,8 @@ function ManageTrader() {
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
     if (!handleValidate()) return;
+    setIsLoading(true);
     try {
       const data = new FormData();
       // Append all text fields
