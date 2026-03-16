@@ -137,3 +137,18 @@ export function BuddhistDatePicker({ value, onChange, minDate, placeholder }) {
     />
   );
 }
+
+export const formatCurrency = (value) => {
+  if (!value) return "0.00";
+  // ลบ comma เดิมออกก่อนแปลงเป็นตัวเลข เพื่อป้องกันค่าผิดเพี้ยน
+  const stringValue = String(value).replace(/,/g, "");
+  const numberValue = parseFloat(stringValue);
+  if (isNaN(numberValue)) return "0.00";
+  
+  return numberValue.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: true, // บังคับให้ใส่ comma
+  });
+};
+
