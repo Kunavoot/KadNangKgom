@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import { formatCurrency } from "../../utils/utils";
 
 function ManageMarket() {
+  // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [isForm, setIsForm] = useState(false);
   const [formType, setFormType] = useState("");

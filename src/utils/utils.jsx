@@ -144,11 +144,10 @@ export const formatCurrency = (value) => {
   const stringValue = String(value).replace(/,/g, "");
   const numberValue = parseFloat(stringValue);
   if (isNaN(numberValue)) return "0.00";
-  
+
   return numberValue.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     useGrouping: true, // บังคับให้ใส่ comma
   });
 };
-

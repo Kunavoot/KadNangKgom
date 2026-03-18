@@ -132,16 +132,23 @@ const initialContracts = [
 ];
 
 const productTypes = ["อาหาร", "เสื้อผ้า", "ของใช้", "อุปกรณ์", "อื่นๆ"];
-const sellDays = ["ทุกวัน", "เสาร์", "อาทิตย์", "เสาร์-อาทิตย์"];
 
 function ManageAgreement() {
-  const [isLoading] = useState(false);
+  // จัดการหน้าเว็บ
+  const [isLoading, setIsLoading] = useState(false);
   const [view, setView] = useState("list");
-  const [groups] = useState(initialGroups);
+
+  // ข้อมูล
+  const [groups, setGroups] = useState(initialGroups);
   const [contracts, setContracts] = useState(initialContracts);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [selectedStall, setSelectedStall] = useState(null);
-  const [uploadedPlanName, setUploadedPlanName] = useState("");
+  const [filterDate, setFilterDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const sellDays = [
+    { id: "1", name: "เสาร์" },
+    { id: "2", name: "อาทิตย์" },
+    { id: "3", name: "เสาร์-อาทิตย์" },
+  ];
   const [formData, setFormData] = useState({
     stallId: "",
     groupName: "",
@@ -152,8 +159,11 @@ function ManageAgreement() {
     contractDate: "",
     endDate: "",
   });
-
-  const uploadInputRef = useRef(null);
+  const [groupFilter, setGroupFilter] = useState({
+    sellDay: "",
+    startDate: "",
+    endDate: "",
+  });
 
   const selectedGroup = useMemo(
     () => groups.find((group) => group.id === selectedGroupId) || null,
@@ -218,6 +228,34 @@ function ManageAgreement() {
     });
   };
 
+  const handleFilterDateChange = (value) => {
+    setFilterDate(value);
+    // TODO: เรียก API ดึงข้อมูลสัญญาเช่าตามวันที่เลือกที่นี่
+    // ตัวอย่างเช่น:
+    // fetchAgreementsByDate(value);
+    console.log("เรียก API โดยใช้วันที่:", value);
+  };
+
+  const handleGroupFilterChange = (name, value) => {
+    setGroupFilter((prev) => {
+      if (name === "startDate") {
+        const shouldResetEndDate =
+          prev.endDate && value && dayjs(prev.endDate).isBefore(dayjs(value));
+        return {
+          ...prev,
+          startDate: value,
+          endDate: shouldResetEndDate ? "" : prev.endDate,
+        };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const handleShowGroupData = () => {
+    console.log("แสดงข้อมูลสำหรับ Group:", selectedGroupId, groupFilter);
+    // TODO: เรียก API สำหรับดึงข้อมูลใน Group ตรงนี้
+  };
+
   const handleSave = () => {
     if (!formData.stallId) {
       handleBackFromForm();
@@ -238,17 +276,6 @@ function ManageAgreement() {
     handleBackFromForm();
   };
 
-  const handleUploadClick = () => {
-    if (uploadInputRef.current) {
-      uploadInputRef.current.click();
-    }
-  };
-
-  const handleUploadChange = (e) => {
-    const file = e.target.files?.[0];
-    setUploadedPlanName(file ? file.name : "");
-  };
-
   const getStallClass = (status) => {
     if (status === "เช่าแล้ว") return "bg-[#ff7d7d]";
     if (status === "ว่าง") return "bg-[#a9ff9f]";
@@ -261,31 +288,16 @@ function ManageAgreement() {
 
       {view === "list" && (
         <>
-          <div className="flex items-center justify-end gap-4 pb-6">
-            <input
-              ref={uploadInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleUploadChange}
-            />
-            <button
-              className="btn bg-[#FFE680] border-[#FFE680] shadow-sm hover:bg-[#f5db69] hover:border-[#f5db69]"
-              onClick={handleUploadClick}
-            >
-              อัพโหลดแผนผัง
-            </button>
-            <button
-              className="btn bg-[#9CF6A1] border-[#9CF6A1] shadow-sm hover:bg-[#84e98b] hover:border-[#84e98b]"
-              onClick={() => handleOpenForm(null, null)}
-            >
-              จัดการสัญญาเช่า
-            </button>
-          </div>
-          {uploadedPlanName && (
-            <div className="text-sm text-gray-500 pb-4">
-              ไฟล์แผนผังที่อัพโหลด: {uploadedPlanName}
+          <div className="flex items-center justify-between gap-4 pb-6">
+            <div className="text-2xl font-bold">จัดการสัญญาเช่า</div>
+            <div className="flex items-center w-50 gap-4">
+              <BuddhistDatePicker
+                value={filterDate}
+                onChange={handleFilterDateChange}
+                placeholder="เลือกวันที่ค้นหา"
+              />
             </div>
-          )}
+          </div>
 
           <div className="overflow-x-auto mb-12">
             <table className="table">
@@ -322,6 +334,7 @@ function ManageAgreement() {
           </div>
 
           <div className="overflow-x-auto">
+            <div className="text-2xl font-bold pb-6">สัญญาเช่า</div>
             <table className="table">
               <thead>
                 <tr className="bg-[#71FF7A]">
@@ -366,26 +379,75 @@ function ManageAgreement() {
             </button>
           </div>
           <div className="p-8">
+            <div className="flex flex-col md:flex-row gap-4 mb-8 items-end">
+              <div className="w-full md:w-1/4">
+                <label className="label">
+                  <span className="label-text text-lg">วันที่ขาย</span>
+                </label>
+                <select
+                  className="select select-bordered w-full h-12"
+                  value={groupFilter.sellDay}
+                  onChange={(e) =>
+                    handleGroupFilterChange("sellDay", e.target.value)
+                  }
+                >
+                  <option value="" disabled>เลือกวันที่ขาย</option>
+                  {sellDays.map((day) => (
+                    <option key={day.id} value={day.id}>
+                      {day.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full md:w-1/4">
+                <label className="label">
+                  <span className="label-text text-lg">
+                    วันที่เริ่มต้นสัญญา
+                  </span>
+                </label>
+                <BuddhistDatePicker
+                  value={groupFilter.startDate}
+                  onChange={(value) =>
+                    handleGroupFilterChange("startDate", value)
+                  }
+                  placeholder="เลือกวันที่เริ่มต้นสัญญา"
+                />
+              </div>
+              <div className="w-full md:w-1/4">
+                <label className="label">
+                  <span className="label-text text-lg">วันที่สิ้นสุดสัญญา</span>
+                </label>
+                <BuddhistDatePicker
+                  value={groupFilter.endDate}
+                  onChange={(value) =>
+                    handleGroupFilterChange("endDate", value)
+                  }
+                  minDate={toDate(groupFilter.startDate)}
+                  placeholder="เลือกวันที่สิ้นสุดสัญญา"
+                />
+              </div>
+              <div className="ml-auto w-1/6">
+                <button
+                  className="btn bg-[#77e279] border-[#77e279] text-white shadow-sm hover:bg-[#68d56b] hover:border-[#68d56b] w-full h-10 text-lg"
+                  onClick={handleShowGroupData}
+                >
+                  แสดงข้อมูล
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {(selectedGroup.stalls.length
-                ? selectedGroup.stalls
-                : Array.from({ length: 10 }).map((_, index) => ({
-                    id: `0${index + 1}000`,
-                    status: "ไม่พร้อม",
-                  }))
-              )
-                .slice(0, 12)
-                .map((stall) => (
-                  <button
-                    key={stall.id}
-                    className={`h-[110px] w-full flex items-center justify-center text-3xl font-medium text-black shadow cursor-pointer ${getStallClass(
-                      stall.status,
-                    )}`}
-                    onClick={() => handleOpenForm(stall, selectedGroup)}
-                  >
-                    {stall.id}
-                  </button>
-                ))}
+              {selectedGroup.stalls.slice(0, 12).map((stall) => (
+                <button
+                  key={stall.id}
+                  className={`h-[110px] w-full flex items-center justify-center text-3xl font-medium text-black shadow cursor-pointer ${getStallClass(
+                    stall.status,
+                  )}`}
+                  onClick={() => handleOpenForm(stall, selectedGroup)}
+                >
+                  {stall.id}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -491,10 +553,10 @@ function ManageAgreement() {
                     value={formData.sellDay}
                     onChange={handleFormChange}
                   >
-                    <option value="">เลือกวันที่ขาย</option>
+                    <option value="" disabled>เลือกวันที่ขาย</option>
                     {sellDays.map((day) => (
-                      <option key={day} value={day}>
-                        {day}
+                      <option key={day.id} value={day.id}>
+                        {day.name}
                       </option>
                     ))}
                   </select>
