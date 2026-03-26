@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../service/AuthContext";
 import Loading from "../Loading";
@@ -20,23 +20,6 @@ function EditInfo() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState("");
   const [prefixOptions, setPrefixOptions] = useState([]);
-
-  // useEffect(() => {
-  //   // จำลองการดึงข้อมูลผู้ค้า
-  //   setIsLoading(true);
-  //   try {
-  //     // setFormData(defaultProfile);
-  //     setOriginalData(defaultProfile);
-  //     setImagePreview("");
-  //     setOriginalImage("");
-  //     setTraderImagePreview("");
-  //     setOriginalTraderImage("");
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     setIsLoading(false);
-  //     console.error("Error fetching profile:", error);
-  //   }
-  // }, []);
 
   useEffect(() => {
     return () => {
@@ -91,7 +74,6 @@ function EditInfo() {
   };
 
   const handleSave = async () => {
-    console.log(formData);
     for (const key in formData) {
       if (formData[key] === "") {
         Swal.fire({
@@ -146,7 +128,6 @@ function EditInfo() {
     setOriginalData(formData);
     setOriginalImage(imagePreview);
     setOriginalTraderImage(traderImagePreview);
-    console.log("Saved profile:", formData);
   };
 
   const getProfile = async () => {
@@ -162,7 +143,6 @@ function EditInfo() {
           },
         },
       );
-      console.log(response.data.data);
 
       const traderData = response.data.data[0] || {};
       setFormData(traderData);
@@ -201,12 +181,6 @@ function EditInfo() {
     getProfile();
     getPrefix();
   }, []);
-
-  // useEffect(() => {
-  //   if (user?.username) {
-  //     getProfile();
-  //   }
-  // }, [user]);
 
   return (
     <>

@@ -34,14 +34,19 @@ export const toThaiDisplayDate = (dateValue) => {
   return dayjs(dateValue).format("DD/MM/BBBB");
 };
 
-const DateInput = forwardRef(({ value, onClick, placeholder }, ref) => (
+const DateInput = forwardRef(({ value, onClick, placeholder, disabled }, ref) => (
   <button
     type="button"
     ref={ref}
     onClick={onClick}
-    className="flex h-10 w-full items-center justify-between rounded-sm border border-gray-300 bg-white px-4 text-left text-sm text-gray-700 transition hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200"
+    disabled={disabled}
+    className={`flex h-10 w-full items-center justify-between rounded-sm border px-4 text-left text-sm transition focus:outline-none focus:ring-2 focus:ring-gray-200 ${
+      disabled
+        ? "cursor-not-allowed border-gray-200 bg-gray-200 text-gray-500"
+        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+    }`}
   >
-    <span className={value ? "text-gray-700" : "text-gray-400"}>
+    <span className={value ? (disabled ? "text-gray-500" : "text-gray-700") : "text-gray-400"}>
       {value || placeholder}
     </span>
     <svg
@@ -61,19 +66,38 @@ const DateInput = forwardRef(({ value, onClick, placeholder }, ref) => (
 
 DateInput.displayName = "DateInput";
 
-export function BuddhistDatePicker({ value, onChange, minDate, placeholder }) {
+export function BuddhistDatePicker({ value, onChange, minDate, maxDate, placeholder, disabled }) {
   const selectedDate = toDate(value);
+
+  const getDayClassName = (date) => {
+    if (!minDate && !maxDate) return undefined;
+    
+    const dDate = dayjs(date);
+    const isSelected = selectedDate && dDate.isSame(dayjs(selectedDate), "day");
+    
+    if (isSelected) return undefined;
+
+    let isSelectable = true;
+    if (minDate) isSelectable = isSelectable && (dDate.isSame(dayjs(minDate), "day") || dDate.isAfter(dayjs(minDate), "day"));
+    if (maxDate) isSelectable = isSelectable && (dDate.isSame(dayjs(maxDate), "day") || dDate.isBefore(dayjs(maxDate), "day"));
+    
+    // Highlight the selectable dates within the bounded range
+    return isSelectable ? "!bg-blue-50 !text-blue-700 !font-semibold !rounded-full hover:!bg-blue-100" : undefined;
+  };
 
   return (
     <DatePicker
+      disabled={disabled}
       selected={selectedDate}
       onChange={(date) => onChange(toStorageDate(date))}
       minDate={minDate || undefined}
+      maxDate={maxDate || undefined}
+      dayClassName={getDayClassName}
       shouldCloseOnSelect
       popperPlacement="bottom-start"
       calendarClassName="buddhist-datepicker"
       wrapperClassName="w-full"
-      customInput={<DateInput placeholder={placeholder} />}
+      customInput={<DateInput placeholder={placeholder} disabled={disabled} />}
       value={selectedDate ? toThaiDisplayDate(value) : ""}
       formatWeekDay={(dayName) => dayName.slice(0, 2)}
       renderCustomHeader={({

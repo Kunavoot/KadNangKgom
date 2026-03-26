@@ -1,20 +1,40 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../Loading";
-import { BuddhistDatePicker } from "../../utils/utils.jsx";
+import { BuddhistDatePicker, formatCurrency } from "../../utils/utils.jsx";
+import { useAuth } from "../../service/AuthContext";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function Sales() {
+  // จัดการหน้าเว็บ
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+
+  // ข้อมูล
   const [salesHistory, setSalesHistory] = useState([]);
+  const [formData, setFormData] = useState({
+    sale_id: "",
+    sale_date: "",
+    sale_trader: "",
+    sale_shop: "",
+    sale_ptype: "",
+    sale_ptype_name: "",
+    sale_group: "",
+    sale_group_name: "",
+    sale_amount: "",
+    sale_best: "",
+    sale_suggest: "",
+    sale_mtype: "",
+    sale_mtype_name: "",
+    sale_sell_day: "",
+  });
+  const [agreement, setAgreement] = useState([]);
 
-  const defaultFormData = {
-    memberId: "90000000001",
-    saleDate: "",
-    amount: "",
-    bestProduct: "",
-    suggestion: "",
-  };
+  const selectedAgreement = agreement.find(
+    (item) => String(item.agmt_id) === String(formData.sale_id),
+  );
 
-  const [formData, setFormData] = useState(defaultFormData);
+  const formatAmount = (value) => Number(value).toFixed(2);
 
   const getSalesHistory = () => {
     setIsLoading(true);
@@ -67,7 +87,7 @@ function Sales() {
   useEffect(() => {
     getSalesHistory();
   }, []);
-
+  
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -75,21 +95,179 @@ function Sales() {
 
   const handleReset = () => {
     setFormData((prev) => ({
-      ...defaultFormData,
-      memberId: prev.memberId,
+      ...prev,
+      sale_id: "",
+      sale_date: "",
+      sale_group: "",
+      sale_group_name: "",
+      sale_amount: "",
+      sale_best: "",
+      sale_suggest: "",
     }));
   };
 
   const handleSaleDateChange = (value) => {
-    setFormData((prev) => ({ ...prev, saleDate: value }));
+    setFormData((prev) => ({ ...prev, sale_date: value }));
   };
 
-  const handleSubmit = () => {
-    // TODO: เชื่อม API ส่งยอดขาย
+  const handleValidate = () => {
+    for (const key in formData) {
+      if (formData[key] === "") {
+        Swal.fire({
+          icon: "error",
+          title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#5bc06d",
+        });
+        return false;
+      }
+    }
+
+    if (formData.sale_amount < 0) {
+      Swal.fire({
+        icon: "error",
+        title: "ยอดขายต้องไม่เป็นลบ",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      return false;
+    }
+
+    if (formData.sale_date > new Date().toISOString().split("T")[0]) {
+      Swal.fire({
+        icon: "error",
+        title: "วันที่ส่งยอดขายต้องไม่เกินวันที่ปัจจุบัน",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      return false;
+    }
+
+    if (formData.sale_date > new Date().toISOString().split("T")[0]) {
+      Swal.fire({
+        icon: "error",
+        title: "วันที่ส่งยอดขายต้องไม่เกินวันที่ปัจจุบัน",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      return false;
+    }
+    return true;
+  }
+
+  const handleSubmit = async () => {
+    if (!handleValidate()) return;
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        import.meta.env.VITE_API_URL + "/trader/sendSales",
+        formData,
+      );
+      Swal.fire({
+        icon: "success",
+        title: response.data.message,
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } catch (error) {
+      console.error("Error adding sales:", error);
+      Swal.fire({
+        icon: "error",
+        title: error.response.data.message || "เกิดข้อผิดพลาดในการเพิ่มข้อมูล",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } finally {
+      setIsLoading(false);
+    }
     console.log("Submitted sales data:", formData);
   };
 
-  const formatAmount = (value) => Number(value).toFixed(2);
+  const handleSelectAgreement = (value) => {
+    const selectedAgreement = agreement.find(
+      (item) => String(item.agmt_id) === String(value),
+    );
+    setFormData((prev) => ({
+      ...prev,
+      sale_id: Number(value) || "",
+      sale_group: selectedAgreement?.market_group || "",
+      sale_group_name: selectedAgreement?.group_name || "",
+      sale_sell_day: selectedAgreement?.agmt_status || "",
+    }));
+  };
+
+
+  const getSales = async () => {
+    if (!user || !user.username) return;
+
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/trader/getSales",
+        {
+          params: {
+            username: user.username,
+          },
+        },
+      );
+
+      const data = response.data.data[0];
+      setFormData({
+        sale_id: "",
+        sale_date: "",
+        sale_trader: data.sale_trader,
+        sale_shop: data.trader_shop,
+        sale_ptype: data.trader_ptype,
+        sale_ptype_name: data.trader_ptype_name,
+        sale_group: "",
+        sale_amount: "",
+        sale_best: "",
+        sale_suggest: "",
+        sale_mtype: data.trader_mtype,
+        sale_mtype_name: data.trader_mtype_name,
+      });
+      getAgreement(response.data.data[0].sale_trader);
+    } catch (error) {
+      console.error("Error fetching sales :", error);
+      Swal.fire({
+        icon: "error",
+        title: error.response.data.message || "เกิดข้อผิดพลาดในการดึงข้อมูล",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAgreement = async (trader_no) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/trader/getAgreement",
+        {
+          params: {
+            trader_no: trader_no,
+          },
+        },
+      );
+      setAgreement(response.data.data);
+    } catch (error) {
+      console.error("Error fetching agreement :", error);
+      Swal.fire({
+        icon: "error",
+        title: error.response.data.message || "เกิดข้อผิดพลาดในการดึงข้อมูล",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getSales();
+  }, []);
 
   return (
     <>
@@ -98,15 +276,80 @@ function Sales() {
       <div className="w-full">
         <div className="text-2xl font-bold mb-4">ส่งยอดขาย</div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-2">
+        <div className="grid grid-cols-1 grid-cols-2 gap-x-10 gap-y-2">
+          <div className="flex gap-x-2">
+            <div className="w-1/2">
+              <label className="label py-1">
+                <span className="label-text text-lg">รหัสสมาชิก</span>
+              </label>
+              <input
+                className="input input-bordered w-full bg-gray-200"
+                name="sale_trader"
+                value={
+                  formData.sale_trader
+                    ? String(formData.sale_trader).padStart(6, "0")
+                    : ""
+                }
+                onChange={handleFormChange}
+                disabled
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="label py-1">
+                <span className="label-text text-lg">ชื่อร้านค้า</span>
+              </label>
+              <input
+                className="input input-bordered w-full bg-gray-200"
+                name="sale_shop"
+                value={formData.sale_shop || ""}
+                onChange={handleFormChange}
+                disabled
+              />
+            </div>
+          </div>
+
           <div>
             <label className="label py-1">
-              <span className="label-text text-lg">รหัสสมาชิก</span>
+              <span className="label-text text-lg">สัญญาเช่า</span>
+            </label>
+            <select
+              className="select select-bordered w-full"
+              name="sale_id"
+              value={formData.sale_id || ""}
+              onChange={(e) => handleSelectAgreement(e.target.value)}
+            >
+              <option value="" disabled>
+                เลือกสัญญาเช่า
+              </option>
+              {agreement.map((item) => (
+                <option key={item.agmt_id} value={item.agmt_id}>
+                  {String(item.agmt_id).padStart(6, "0")}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label py-1">
+              <span className="label-text text-lg">ประเภทสินค้า</span>
             </label>
             <input
               className="input input-bordered w-full bg-gray-200"
-              name="memberId"
-              value={formData.memberId}
+              name="sale_ptype_name"
+              value={formData.sale_ptype_name || ""}
+              onChange={handleFormChange}
+              disabled
+            />
+          </div>
+
+          <div>
+            <label className="label py-1">
+              <span className="label-text text-lg">กลุ่มสังกัด</span>
+            </label>
+            <input
+              className="input input-bordered w-full bg-gray-200"
+              name="sale_group_name"
+              value={formData?.sale_group_name || ""}
               onChange={handleFormChange}
               disabled
             />
@@ -118,10 +361,10 @@ function Sales() {
             </label>
             <input
               className="input input-bordered w-full"
-              name="bestProduct"
-              value={formData.bestProduct}
+              name="sale_best"
+              value={formData.sale_best}
               onChange={handleFormChange}
-              placeholder="กรอกสินค้า"
+              placeholder="กรอกชื่อสินค้าขายดี"
             />
           </div>
 
@@ -130,9 +373,20 @@ function Sales() {
               <span className="label-text text-lg">วันที่ส่งยอดขาย</span>
             </label>
             <BuddhistDatePicker
-              value={formData.saleDate}
+              value={formData?.sale_date}
               onChange={handleSaleDateChange}
+              minDate={
+                selectedAgreement?.agmt_start
+                  ? new Date(selectedAgreement.agmt_start)
+                  : undefined
+              }
+              maxDate={
+                selectedAgreement?.agmt_end
+                  ? new Date(selectedAgreement.agmt_end)
+                  : undefined
+              }
               placeholder="วว/ดด/ปปปป"
+              disabled={!selectedAgreement}
             />
           </div>
 
@@ -142,8 +396,8 @@ function Sales() {
             </label>
             <textarea
               className="textarea textarea-bordered w-full h-[122px] resize-none"
-              name="suggestion"
-              value={formData.suggestion}
+              name="sale_suggest"
+              value={formData.sale_suggest}
               onChange={handleFormChange}
               placeholder="กรอกข้อเสนอแนะ"
             />
@@ -155,11 +409,11 @@ function Sales() {
             </label>
             <input
               className="input input-bordered w-full"
-              name="amount"
+              name="sale_amount"
               type="number"
               min="0"
-              step="0.01"
-              value={formData.amount}
+              step="1.00"
+              value={formData.sale_amount}
               onChange={handleFormChange}
               placeholder="0.00"
             />
