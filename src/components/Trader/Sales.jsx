@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Loading from "../Loading";
-import { BuddhistDatePicker, formatCurrency } from "../../utils/utils.jsx";
+import { BuddhistDatePicker, formatCurrency, toThaiDisplayDate } from "../../utils/utils.jsx";
 import { useAuth } from "../../service/AuthContext";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -9,9 +9,10 @@ function Sales() {
   // จัดการหน้าเว็บ
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSale, setSelectedSale] = useState([]);
 
   // ข้อมูล
-  const [salesHistory, setSalesHistory] = useState([]);
   const [formData, setFormData] = useState({
     sale_id: "",
     sale_date: "",
@@ -29,64 +30,32 @@ function Sales() {
     sale_sell_day: "",
   });
   const [agreement, setAgreement] = useState([]);
+  const [salesHistory, setSalesHistory] = useState([]);
 
   const selectedAgreement = agreement.find(
     (item) => String(item.agmt_id) === String(formData.sale_id),
   );
 
-  const formatAmount = (value) => Number(value).toFixed(2);
+  const getSalesHistory = async (trader_no) => {
+    if (!trader_no && !formData.sale_trader) return;
 
-  const getSalesHistory = () => {
     setIsLoading(true);
     try {
-      // จำลองข้อมูลประวัติการส่งยอดขาย
-      setSalesHistory([
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/trader/getSalesHistory",
         {
-          id: 1,
-          amount: 3000.0,
-          saleDate: "01/05/2568",
-          bestProduct: "ลูกชิ้นหมู",
-          suggestion: "อยากให้มี..................",
+          params: {
+            sale_trader: trader_no || formData.sale_trader,
+          },
         },
-        {
-          id: 2,
-          amount: 3000.0,
-          saleDate: "02/05/2568",
-          bestProduct: "ลูกชิ้นหมู",
-          suggestion: "อยากให้มี..................",
-        },
-        {
-          id: 3,
-          amount: 3000.0,
-          saleDate: "08/05/2568",
-          bestProduct: "ลูกชิ้นหมู",
-          suggestion: "อยากให้มี..................",
-        },
-        {
-          id: 4,
-          amount: 3000.0,
-          saleDate: "09/05/2568",
-          bestProduct: "ลูกชิ้นหมู",
-          suggestion: "อยากให้มี..................",
-        },
-        {
-          id: 5,
-          amount: 3000.0,
-          saleDate: "15/05/2568",
-          bestProduct: "ลูกชิ้นหมู",
-          suggestion: "อยากให้มี..................",
-        },
-      ]);
+      );
+      setSalesHistory(response.data.data);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       console.error("Error fetching sales history:", error);
     }
   };
-
-  useEffect(() => {
-    getSalesHistory();
-  }, []);
   
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -169,6 +138,8 @@ function Sales() {
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#5bc06d",
       });
+      getSalesHistory();
+      handleReset();
     } catch (error) {
       console.error("Error adding sales:", error);
       Swal.fire({
@@ -226,7 +197,8 @@ function Sales() {
         sale_mtype: data.trader_mtype,
         sale_mtype_name: data.trader_mtype_name,
       });
-      getAgreement(response.data.data[0].sale_trader);
+      getAgreement(data.sale_trader);
+      getSalesHistory(data.sale_trader);
     } catch (error) {
       console.error("Error fetching sales :", error);
       Swal.fire({
@@ -266,8 +238,10 @@ function Sales() {
   };
 
   useEffect(() => {
-    getSales();
-  }, []);
+    if (user?.username) {
+      getSales();
+    }
+  }, [user?.username]);
 
   return (
     <>
@@ -440,12 +414,13 @@ function Sales() {
         <div className="text-2xl font-bold mt-4 mb-2">ประวัติการส่งยอดขาย</div>
 
         <div className="overflow-x-auto pb-2">
-          <table className="table min-w-[980px]">
+          <table className="table max-h-100">
             <thead>
-              <tr className="bg-[#71E67D]">
+              <tr className="bg-[#71E67D] h-10">
                 <th className="text-center w-[8%]">ครั้งที่</th>
-                <th className="text-center w-[14%]">จำนวนเงิน</th>
+                <th className="text-center w-[5%]">สัญญาเช่า</th>
                 <th className="text-center w-[18%]">วันที่ส่งยอดขาย</th>
+                <th className="text-center w-[14%]">จำนวนเงิน</th>
                 <th className="text-center w-[14%]">สินค้าที่ขายดี</th>
                 <th className="text-center">ข้อเสนอแนะ</th>
                 <th className="text-center w-[12%]">รายละเอียด</th>
@@ -454,19 +429,21 @@ function Sales() {
             <tbody>
               {salesHistory.length > 0 ? (
                 salesHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-100">
-                    <td className="text-center">{item.id}</td>
-                    <td className="text-center">{formatAmount(item.amount)}</td>
-                    <td className="text-center">{item.saleDate}</td>
-                    <td className="text-center">{item.bestProduct}</td>
-                    <td className="text-center">{item.suggestion}</td>
+                  <tr key={item.row_num} className="hover:bg-gray-100 h-10">
+                    <td className="text-center">{item.row_num}</td>
+                    <td className="text-center">{item.sale_id?.toString().padStart(6, "0") || "-"}</td>
+                    <td className="text-center">{toThaiDisplayDate(item.sale_date) || "-"}</td>
+                    <td className="text-center">{formatCurrency(item.sale_amount) || "-"}</td>
+                    <td className="text-center">{item.sale_best || "-"}</td>
+                    <td className="text-center">{item.sale_suggest || "-"}</td>
                     <td className="text-center">
                       <button
                         type="button"
-                        className="underline underline-offset-2 hover:text-gray-600"
-                        onClick={() =>
-                          console.log("View sale detail:", item.id)
-                        }
+                        className="underline underline-offset-2 cursor-pointer hover:text-gray-600"
+                        onClick={() => {
+                          setSelectedSale(item);
+                          setIsModalOpen(true);
+                        }}
                       >
                         ดูรายละเอียด
                       </button>
@@ -484,6 +461,128 @@ function Sales() {
           </table>
         </div>
       </div>
+
+      {isModalOpen && selectedSale && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 transition-opacity">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <button 
+              type="button"
+              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 focus:outline-none focus:bg-gray-200"
+              onClick={() => {
+                setIsModalOpen(false);
+                setTimeout(() => setSelectedSale(null), 200);
+              }}
+            >
+              ✕
+            </button>
+            
+            <h3 className="text-2xl font-bold mb-6">รายละเอียดยอดขาย</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
+              <div>
+                <label className="label py-1">
+                  <span className="label-text text-lg">ครั้งที่</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={selectedSale.row_num}
+                  disabled
+                />
+              </div>
+              
+              <div>
+                <label className="label py-1">
+                  <span className="label-text text-lg">สัญญาเช่า</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={selectedSale.sale_id?.toString().padStart(6, "0") || "-"}
+                  disabled
+                />
+              </div>
+              
+              <div>
+                <label className="label py-1">
+                  <span className="label-text text-lg">วันที่ส่งยอดขาย</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={toThaiDisplayDate(selectedSale.sale_date) || "-"}
+                  disabled
+                />
+              </div>
+              
+              <div>
+                <label className="label py-1">
+                  <span className="label-text text-lg">จำนวนเงิน</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={formatCurrency(selectedSale.sale_amount) || "-"}
+                  disabled
+                />
+              </div>
+              
+              <div>
+                <label className="label py-1">
+                  <span className="label-text text-lg">ประเภทสินค้า</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={selectedSale.ptype_name || "-"}
+                  disabled
+                />
+              </div>
+              
+              <div>
+                <label className="label py-1">
+                  <span className="label-text text-lg">กลุ่มสังกัด</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={selectedSale.group_name || "-"}
+                  disabled
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="label py-1">
+                  <span className="label-text text-lg">สินค้าที่ขายดี</span>
+                </label>
+                <input
+                  className="input input-bordered w-full bg-gray-200 text-black"
+                  value={selectedSale.sale_best  || "-"}
+                  disabled
+                />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="label py-1">
+                  <span className="label-text text-lg">ข้อเสนอแนะ</span>
+                </label>
+                <textarea
+                  className="textarea textarea-bordered w-full h-[122px] resize-none bg-gray-200 text-black"
+                  value={selectedSale.sale_suggest || "-"}
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end gap-3">
+              <button
+                type="button"
+                className="btn h-11 min-h-11 rounded-xl border-2 border-[#ff7f7f] bg-white px-10 text-base font-medium text-black shadow-none hover:bg-[#fff2f2] hover:border-[#ff6b6b]"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setTimeout(() => setSelectedSale(null), 200);
+                }}
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
