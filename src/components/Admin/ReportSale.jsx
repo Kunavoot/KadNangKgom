@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import Loading from "../Loading";
 import axios from "axios";
-import Swal from "sweetalert2";
 import { formatCurrency } from "../../utils/utils";
 
 const reportTypes = [
@@ -71,9 +70,6 @@ function ReportSale() {
       window.print();
       return;
     }
-
-    console.log(selectedMonth);
-    
 
     const yearText = `ปี ${parseInt(selectedYear) + 543}`;
     const monthText = `เดือน${months.find((m) => m.key == selectedMonth)?.label}`;
