@@ -4,12 +4,12 @@ function Footer() {
   return (
     <>
       <footer className="footer footer-horizontal bg-linear-to-l from-[#A9F481] to-[#00AF35] p-2 text-white ">
-        
-        <aside className="flex items-center gap-10">
-          <img src="/logo.jpg" alt="logo" className="w-35 rounded-full" />
-          <div className="grid grid-flow-row gap-4">
+        <aside className="flex flex-row items-center justify-between">
+          <div className="flex flex-row gap-2 items-center h-10">
+            <img src="/logo.jpg" alt="logo" className="w-10 rounded-full" />
             <p className="text-xl">กาดนั่งก้อม</p>
-
+          </div>
+          <div className="flex flex-row gap-5 items-center h-10">
             <a href="#">Tel. 083-154-5834</a>
 
             <a href="#" className="flex flex-row gap-1">

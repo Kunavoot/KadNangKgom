@@ -7,39 +7,6 @@ const dayFilters = [
   { key: "2", label: "วันอาทิตย์" },
 ];
 
-const groups = [
-  {
-    id: "g1",
-    name: "ไก่",
-    stalls: ["01001", "01002", "01003", "01004", "01005"],
-  },
-  {
-    id: "g2",
-    name: "ม้า",
-    stalls: ["02001", "02002", "02003", "02004", "02005"],
-  },
-  {
-    id: "g3",
-    name: "หนอน",
-    stalls: ["03001", "03002", "03003", "03004", "03005"],
-  },
-  {
-    id: "g4",
-    name: "นก",
-    stalls: ["04001", "04002", "04003", "04004", "04005"],
-  },
-  {
-    id: "g5",
-    name: "ปลา",
-    stalls: ["05001", "05002", "05003", "05004", "05005"],
-  },
-];
-
-function getStallState(index) {
-  if (index < 2) return "rented";
-  return "available";
-}
-
 function getStallChipClass(status) {
   if (!status) {
     return "bg-[#95e49b] hover:bg-[#84d290]";

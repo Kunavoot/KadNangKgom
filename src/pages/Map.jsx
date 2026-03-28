@@ -1,57 +1,69 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const dayFilters = ["วันเสาร์", "วันอาทิตย์"];
-
-const groups = [
-  {
-    id: "g1",
-    name: "ไก่",
-    stalls: ["01001", "01002", "01003", "01004", "01005"],
-  },
-  {
-    id: "g2",
-    name: "ม้า",
-    stalls: ["02001", "02002", "02003", "02004", "02005"],
-  },
-  {
-    id: "g3",
-    name: "หนอน",
-    stalls: ["03001", "03002", "03003", "03004", "03005"],
-  },
-  {
-    id: "g4",
-    name: "นก",
-    stalls: ["04001", "04002", "04003", "04004", "04005"],
-  },
-  {
-    id: "g5",
-    name: "ปลา",
-    stalls: ["05001", "05002", "05003", "05004", "05005"],
-  },
+const dayFilters = [
+  { key: "1", label: "วันเสาร์" },
+  { key: "2", label: "วันอาทิตย์" },
 ];
 
-function getStallState(index) {
-  if (index < 2) return "rented";
-  return "available";
-}
-
 function getStallChipClass(status) {
-  if (status === "rented") {
-    return "bg-[#ff7e7e]";
+  if (!status) {
+    return "bg-[#95e49b]";
   }
-
-  return "bg-[#95e49b]";
+  return "bg-[#ff7e7e]";
 }
 
 function Map() {
-  const [activeDay, setActiveDay] = useState("วันเสาร์");
+  const [activeDay, setActiveDay] = useState("1");
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [mapZoom, setMapZoom] = useState(1);
   const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
   const [isDraggingMap, setIsDraggingMap] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [mapImage, setMapImage] = useState(null);
+  const [reportMap, setReportMap] = useState([]);
+
+  useEffect(() => {
+    fetchMapImage();
+  }, []);
+
+  const fetchMapImage = async () => {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getMapImage",
+      );
+      setMapImage(response.data.filename);
+    } catch (error) {
+      console.error("Error fetching map image:", error);
+    }
+  };
+
+  const getReportMap = async () => {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getReportMap",
+        {
+          params: {
+            date: new Date().toISOString().split("T")[0],
+            sell_day: activeDay,
+          },
+        },
+      );
+      setReportMap(response.data.data);
+    } catch (error) {
+      console.error("Error fetching report map:", error);
+    }
+  };
+
+  useEffect(() => {
+    getReportMap();
+  }, [activeDay]);
+
+  const mapSource = mapImage
+    ? `${import.meta.env.VITE_BACKEND_URL}/image/${mapImage}`
+    : "/asset/map_market.png";
 
   const closeExpandedMap = () => {
     setIsMapExpanded(false);
@@ -118,29 +130,43 @@ function Map() {
                 aria-label="ขยายรูปแผนผังพื้นที่ตลาด"
               >
                 <img
-                  src="/asset/map_market.png"
+                  src={mapSource}
                   alt="แผนผังพื้นที่ตลาด"
                   className="h-full w-full object-contain "
                 />
               </button>
             </div>
 
-            <div className="rounded-lg border border-gray-300 bg-white p-3 shadow-sm">
+            <div className="rounded-lg border border-gray-300 bg-white p-3 shadow-sm max-h-320 overflow-y-auto">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 {dayFilters.map((day) => {
-                  const active = activeDay === day;
+                  const active = activeDay === day.key;
+
+                  let activeClass = "";
+                  let inactiveClass = "";
+
+                  if (day.key === "1") {
+                    activeClass =
+                      "border-[#ea8bea] bg-[#ea8bea] text-black hover:border-[#d678d6] hover:bg-[#d678d6]";
+                    inactiveClass =
+                      "border-[#ea8bea] bg-white text-[#ea8bea] hover:border-[#d678d6] hover:bg-[#d678d6] hover:text-white";
+                  } else if (day.key === "2") {
+                    activeClass =
+                      "border-[#ff7e7e] bg-[#ff7e7e] text-black hover:border-[#ff6b6b] hover:bg-[#ff6b6b]";
+                    inactiveClass =
+                      "border-[#ff7e7e] bg-white text-[#ff7e7e] hover:border-[#ff6b6b] hover:bg-[#ff6b6b] hover:text-white";
+                  }
+
                   return (
                     <button
-                      key={day}
+                      key={day.key}
                       type="button"
-                      onClick={() => setActiveDay(day)}
-                      className={`btn h-10 min-h-10 flex-1 rounded-2xl border px-3 text-base font-medium shadow-none ${
-                        active
-                          ? "border-[#ea8bea] bg-[#ea8bea] text-black hover:border-[#ea8bea] hover:bg-[#ea8bea]"
-                          : "border-[#ff7f7f] bg-white text-black hover:border-[#ff7f7f] hover:bg-[#fff1f1]"
+                      onClick={() => setActiveDay(day.key)}
+                      className={`btn h-10 min-h-10 flex-1 rounded-2xl border px-3 text-base font-medium shadow-none transition-colors ${
+                        active ? activeClass : inactiveClass
                       }`}
                     >
-                      {day}
+                      {day.label}
                     </button>
                   );
                 })}
@@ -156,25 +182,25 @@ function Map() {
               </div>
 
               <div className="space-y-3">
-                {groups.map((group) => (
+                {reportMap.map((group) => (
                   <div
-                    key={group.id}
+                    key={group.group}
                     className="rounded bg-gray-100 p-2.5 min-h-[180px]"
                   >
                     <div className="mb-2 rounded bg-[#65ef6e] px-3 py-1.5 text-2xl font-semibold">
-                      กลุ่มสังกัด : {group.name}
+                      กลุ่มสังกัด : {group.group}
                     </div>
                     <div className="flex flex-wrap gap-2 pb-1">
-                      {group.stalls.map((stall, stallIndex) => (
-                        <span
-                          key={stall}
-                          className={`inline-flex h-9 min-w-[52px] items-center justify-center rounded-full px-2 text-[11px] font-medium text-black ${getStallChipClass(
-                            getStallState(stallIndex),
-                          )}`}
-                        >
-                          {stall}
-                        </span>
-                      ))}
+                      {group.stall.map((stall) => {
+                        return (
+                          <span
+                            key={stall.stall_id}
+                            className={`inline-flex h-9 min-w-[52px] items-center justify-center rounded-full px-2 text-[11px] font-medium text-black ${getStallChipClass(stall.stall_status)}`}
+                          >
+                            {stall.stall_id}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -230,7 +256,7 @@ function Map() {
             </div>
 
             <img
-              src="/asset/map_market.png"
+              src={mapSource}
               alt="แผนผังพื้นที่ตลาดแบบขยาย"
               className={`max-h-[90vh] w-auto max-w-[95vw] rounded-md object-contain ${
                 isDraggingMap ? "" : "transition-transform duration-150"
