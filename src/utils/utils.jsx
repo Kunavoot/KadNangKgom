@@ -34,17 +34,20 @@ export const toThaiDisplayDate = (dateValue) => {
   return dayjs(dateValue).format("DD/MM/BBBB");
 };
 
-const DateInput = forwardRef(({ value, onClick, placeholder, disabled }, ref) => (
+const DateInput = forwardRef(({ value, onClick, placeholder, disabled, className }, ref) => {
+  const baseClasses = "flex h-10 w-full items-center justify-between rounded-sm border px-4 text-left text-sm transition focus:outline-none";
+  const defaultFocus = className ? "" : "focus:ring-2 focus:ring-gray-200";
+  const stateClasses = disabled
+    ? "cursor-not-allowed border-gray-200 bg-gray-200 text-gray-500"
+    : "border-gray-300 bg-white text-gray-700 hover:border-gray-400";
+
+  return (
   <button
     type="button"
     ref={ref}
     onClick={onClick}
     disabled={disabled}
-    className={`flex h-10 w-full items-center justify-between rounded-sm border px-4 text-left text-sm transition focus:outline-none focus:ring-2 focus:ring-gray-200 ${
-      disabled
-        ? "cursor-not-allowed border-gray-200 bg-gray-200 text-gray-500"
-        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
-    }`}
+    className={`${baseClasses} ${defaultFocus} ${stateClasses} ${className || ""}`}
   >
     <span className={value ? (disabled ? "text-gray-500" : "text-gray-700") : "text-gray-400"}>
       {value || placeholder}
@@ -62,11 +65,12 @@ const DateInput = forwardRef(({ value, onClick, placeholder, disabled }, ref) =>
       <path d="M7.5 3.5v4M16.5 3.5v4M3.5 9.5h17" />
     </svg>
   </button>
-));
+  );
+});
 
 DateInput.displayName = "DateInput";
 
-export function BuddhistDatePicker({ value, onChange, minDate, maxDate, placeholder, disabled }) {
+export function BuddhistDatePicker({ value, onChange, minDate, maxDate, placeholder, disabled, className }) {
   const selectedDate = toDate(value);
 
   const getDayClassName = (date) => {
@@ -97,7 +101,7 @@ export function BuddhistDatePicker({ value, onChange, minDate, maxDate, placehol
       popperPlacement="bottom-start"
       calendarClassName="buddhist-datepicker"
       wrapperClassName="w-full"
-      customInput={<DateInput placeholder={placeholder} disabled={disabled} />}
+      customInput={<DateInput placeholder={placeholder} disabled={disabled} className={className} />}
       value={selectedDate ? toThaiDisplayDate(value) : ""}
       formatWeekDay={(dayName) => dayName.slice(0, 2)}
       renderCustomHeader={({

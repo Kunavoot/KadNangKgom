@@ -10,7 +10,7 @@ function Home() {
           <Navbar />
         </nav>
 
-        <div className="w-screen h-[55%] my-6 bg-[url('/public/wide_backgroud.jpg')] bg-cover bg-center overflow-auto"></div>
+        <div className="w-screen h-[70%] my-6 bg-[url('/public/wide_backgroud.jpg')] bg-cover bg-center overflow-auto"></div>
 
         <footer className="w-full absolute bottom-0">
           <Footer />

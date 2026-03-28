@@ -6,13 +6,6 @@ import Swal from "sweetalert2";
 function Navbar() {
   const navigate = useNavigate();
   const { isLoggedIn, user, logout } = useAuth();
-  // console.log("Navbar - isLoggedIn:", isLoggedIn);
-  // console.log("Navbar - user:", user);
-
-  // useEffect(() => {
-  //   console.log("Navbar - isLoggedIn changed:", isLoggedIn);
-  //   console.log("Navbar - user changed:", user);
-  // }, [isLoggedIn, user]);
 
   const handleLogout = () => {
     try {
@@ -105,16 +98,6 @@ function Navbar() {
           <li>
             <a onClick={() => navigate("/map")} className="hover:font-bold">
               แผนผัง
-            </a>
-          </li>
-          <li>
-            <a onClick={() => navigate("/")} className="hover:font-bold">
-              เกี่ยวกับเรา
-            </a>
-          </li>
-          <li>
-            <a onClick={() => navigate("/")} className="hover:font-bold">
-              ติดต่อเรา
             </a>
           </li>
         </ul>
