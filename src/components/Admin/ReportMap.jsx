@@ -154,7 +154,7 @@ function ReportMap() {
               window.open(import.meta.env.VITE_CANVA_MAP_LINK, "_blank")
             }
           >
-            เปิดลิ้งค์เว็ปใหม่
+            เปิดลิ้งค์ภาพตลาด
           </button>
           <input
             type="file"
