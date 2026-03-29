@@ -10,9 +10,9 @@ function Footer() {
             <p className="text-xl">กาดนั่งก้อม</p>
           </div>
           <div className="flex flex-row gap-5 items-center h-10">
-            <a href="#">Tel. 083-154-5834</a>
+            <a href="tel:0831545834">Tel. 083-154-5834</a>
 
-            <a href="#" className="flex flex-row gap-1">
+            <a href="mailto:hotdoglanna@gmail.com" className="flex flex-row gap-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -30,7 +30,7 @@ function Footer() {
               email
             </a>
 
-            <a href="#" className="flex flex-row gap-1">
+            <a href="https://www.facebook.com/KADnungKOM" target="_blank" className="flex flex-row gap-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -43,7 +43,7 @@ function Footer() {
               facebook
             </a>
 
-            <a href="#" className="flex flex-row gap-1">
+            <a href="https://sites.google.com/view/boylampang/lampang?fbclid=IwY2xjawQ2GVtleHRuA2FlbQIxMABicmlkETFkZzhwVEZVaWNDbTd2TTBXc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHp4ulA83j_wcagH1I228s4xOiViTbCsVqoBSQYQuPnqE2DPrUjVeIEnN4ZLO_aem_8HvhZORgJ0V4FiuFzfMfww" target="_blank" className="flex flex-row gap-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
