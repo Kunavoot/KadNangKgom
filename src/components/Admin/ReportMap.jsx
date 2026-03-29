@@ -377,7 +377,7 @@ function ReportMap() {
                 </span>
               </div>
 
-              {selectedStall.status === "1" && (
+              {selectedStall.status == "1" && (
                 <>
                   <div className="flex justify-between border-b border-gray-100 pb-2 pt-2">
                     <span className="text-gray-500">ชื่อร้าน</span>

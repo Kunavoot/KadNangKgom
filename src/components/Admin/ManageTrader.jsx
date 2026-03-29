@@ -206,7 +206,7 @@ function ManageTrader() {
     } // ลบช่องว่างหน้าหลัง
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
-      if (item === "trader_no") {
+      if (item === "trader_no" || item === "trader_pic_trader" || item === "trader_pic_product") {
         continue;
       }
       if (!formData[item]) {

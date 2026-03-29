@@ -280,7 +280,7 @@ function ManageMarket() {
             {groups.map((group) => (
               <button
                 key={group.group_id}
-                className="bg-[#D9F7C9] border border-[#CDEEC1] shadow-sm p-4 h-[45] cursor-pointer text-center flex flex-col justify-between hover:shadow-md transition"
+                className="bg-[#D9F7C9] border border-[#CDEEC1] shadow-sm p-4 h-45 cursor-pointer text-center flex flex-col justify-between hover:shadow-md transition"
                 onClick={() => handleSelectGroup(group.group_id)}
               >
                 <div>
