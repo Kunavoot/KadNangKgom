@@ -171,7 +171,7 @@ function Map() {
                   );
                 })}
 
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex items-center gap-2 cursor-default">
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#95e49b] text-[11px] font-medium text-black">
                     ว่าง
                   </span>
@@ -195,7 +195,7 @@ function Map() {
                         return (
                           <span
                             key={stall.stall_id}
-                            className={`inline-flex h-9 min-w-[52px] items-center justify-center rounded-full px-2 text-[11px] font-medium text-black ${getStallChipClass(stall.stall_status)}`}
+                            className={`inline-flex h-9 min-w-[52px] items-center justify-center rounded-full px-2 text-[11px] font-medium text-black cursor-default ${getStallChipClass(stall.stall_status)}`}
                           >
                             {stall.stall_id}
                           </span>

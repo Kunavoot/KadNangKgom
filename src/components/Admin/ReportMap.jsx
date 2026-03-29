@@ -44,6 +44,22 @@ function ReportMap() {
     const file = event.target.files[0];
     if (!file) return;
 
+    const result = await Swal.fire({
+      title: "ยืนยันการอัพโหลด?",
+      text: "คุณต้องการอัพโหลดรูปภาพแผนที่ใหม่ใช่หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#5bc06d",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!result.isConfirmed) {
+      event.target.value = "";
+      return;
+    }
+
     const formData = new FormData();
     formData.append("map_image", file);
 
@@ -69,6 +85,8 @@ function ReportMap() {
         title: "เกิดข้อผิดพลาด",
         text: error.response?.data?.message || "ไม่สามารถอัพโหลดไฟล์แผนที่ได้",
       });
+    } finally {
+      event.target.value = "";
     }
   };
 
@@ -222,7 +240,7 @@ function ReportMap() {
               );
             })}
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2 cursor-default">
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#95e49b] text-[11px] font-medium text-black">
                 ว่าง
               </span>
@@ -394,7 +412,7 @@ function ReportMap() {
                   <div className="flex justify-between pt-2">
                     <span className="text-gray-500">รหัสสัญญาเช่า</span>
                     <span className="font-medium text-gray-800">
-                      {selectedStall.amgt || "-"}
+                      {selectedStall.amgt.toString().padStart(6, "0") || "-"}
                     </span>
                   </div>
                 </>
