@@ -136,6 +136,11 @@ function ManageMemberType() {
   };
 
   const handleValidate = () => {
+    for (const item in formData) {
+      if (typeof formData[item] === "string") {
+        formData[item] = formData[item].trim();
+      }
+    } // ลบช่องว่างหน้าหลัง
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
       if (item === "memtype_id") {

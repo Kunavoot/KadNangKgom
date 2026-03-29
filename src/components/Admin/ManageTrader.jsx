@@ -72,11 +72,7 @@ function ManageTrader() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    if (name === "trader_addr") {
       setFormData((prev) => ({ ...prev, [name]: value }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value.trim() }));
-    }
   };
 
   const handleFileChange = (e, type) => {
@@ -203,12 +199,18 @@ function ManageTrader() {
   };
 
   const handleValidate = () => {
+    for (const item in formData) {
+      if (typeof formData[item] === "string") {
+        formData[item] = formData[item].trim();
+      }
+    } // ลบช่องว่างหน้าหลัง
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
       if (item === "trader_no") {
         continue;
       }
       if (!formData[item]) {
+        console.log(item);
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",

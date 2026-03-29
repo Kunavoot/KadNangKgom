@@ -54,6 +54,12 @@ function Registration() {
   };
 
   const handleValidate = () => {
+    for (const item in formData) {
+      if (typeof formData[item] === "string") {
+        formData[item] = formData[item].trim();
+      }
+    } // ลบช่องว่างหน้าหลัง
+
     for (const key in formData) {
       if (key === "trader_car" && formData.trader_has_car == 0) {
         continue;

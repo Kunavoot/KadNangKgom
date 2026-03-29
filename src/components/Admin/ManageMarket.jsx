@@ -149,18 +149,32 @@ function ManageMarket() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    if (!selectedGroupId) return;
-    if (!formData.market_area || !formData.market_price || !formData.market_addr) {
+  const handleValidate = () => {
+    for (const item in formData) {
+      if (typeof formData[item] === "string") {
+        formData[item] = formData[item].trim();
+      }
+    } // ลบช่องว่างหน้าหลัง
+
+    if (!selectedGroupId) return false;
+    if (
+      !formData.market_area ||
+      !formData.market_price ||
+      !formData.market_addr
+    ) {
       Swal.fire({
         icon: "error",
         title: "กรุณากรอกข้อมูลให้ครบถ้วน",
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#5bc06d",
       });
-      return;
+      return false;
     }
+    return true;
+  };
 
+  const handleSave = async () => {
+    if (!handleValidate()) return;
     setIsLoading(true);
     try {
       const data = new FormData();

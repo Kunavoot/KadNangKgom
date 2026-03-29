@@ -288,7 +288,12 @@ function ManageAgreement() {
     }
   };
 
-  const handleSave = async () => {
+  const handleValidate = () => {
+    for (const item in formData) {
+      if (typeof formData[item] === "string") {
+        formData[item] = formData[item].trim();
+      }
+    } // ลบช่องว่างหน้าหลัง
     for (const item in formData) {
       if (formData[item] === "") {
         Swal.fire({
@@ -297,9 +302,14 @@ function ManageAgreement() {
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
-        return;
+        return false;
       }
     }
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!handleValidate()) return;
     setIsLoading(true);
     try {
       const response = await axios.post(

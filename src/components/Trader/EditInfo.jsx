@@ -73,7 +73,13 @@ function EditInfo() {
     if (picProduct) picProduct.value = "";
   };
 
-  const handleSave = async () => {
+  const handleValidate = () => {
+    for (const item in formData) {
+      if (typeof formData[item] === "string") {
+        formData[item] = formData[item].trim();
+      }
+    } // ลบช่องว่างหน้าหลัง
+
     for (const key in formData) {
       if (formData[key] === "") {
         Swal.fire({
@@ -82,10 +88,14 @@ function EditInfo() {
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
-        return;
+        return false;
       }
     }
+    return true;
+  };
 
+  const handleSave = async () => {
+    if (!handleValidate()) return;
     try {
       setIsLoading(true);
 
