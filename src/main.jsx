@@ -13,7 +13,7 @@ import TraderPage from "./pages/Trader/TraderPage.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/~std660102/KadNangKgom">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/map" element={<Map />} />
