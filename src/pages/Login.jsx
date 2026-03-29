@@ -137,7 +137,7 @@ function Home() {
           <div className="flex-1 w-[45%] justify-items-center content-center">
             <img
               className="h-[90%] text-center"
-              src="/~std660102/KadNangKgom/login_img.png"
+              src={`${import.meta.env.BASE_URL}login_img.png`}
             />
           </div>
         </div>

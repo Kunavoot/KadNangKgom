@@ -72,7 +72,11 @@ function ManageTrader() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "trader_addr") {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value.trim() }));
+    }
   };
 
   const handleFileChange = (e, type) => {
@@ -534,7 +538,7 @@ function ManageTrader() {
                 ) : (
                   // ถ้าไม่มีข้อมูล ให้แสดงแถวนี้แถวเดียว
                   <tr>
-                    <td colSpan="6" className="text-center">
+                    <td colSpan="9" className="text-center">
                       ไม่พบข้อมูล
                     </td>
                   </tr>

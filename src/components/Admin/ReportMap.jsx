@@ -74,7 +74,7 @@ function ReportMap() {
 
   const mapSource = mapImage
     ? `${import.meta.env.VITE_BACKEND_URL}/image/${mapImage}`
-    : "/asset/map_market.png";
+    : `${import.meta.env.BASE_URL}asset/map_market.png`;
 
   const closeExpandedMap = () => {
     setIsMapExpanded(false);

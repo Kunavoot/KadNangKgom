@@ -30,7 +30,7 @@ function Navbar() {
 
         <div className="navbar-center">
           <div className="flex items-center gap-3">
-            <img src="/~std660102/KadNangKgom/logo.jpg" alt="logo" className="w-20 rounded-full" />
+            <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="logo" className="w-20 rounded-full" />
             <p className="text-4xl text-white cursor-default">กาดนั่งก้อม</p>
           </div>
         </div>

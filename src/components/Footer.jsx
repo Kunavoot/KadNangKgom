@@ -6,7 +6,7 @@ function Footer() {
       <footer className="footer footer-horizontal bg-linear-to-l from-[#A9F481] to-[#00AF35] p-2 text-white ">
         <aside className="flex flex-row items-center justify-between">
           <div className="flex flex-row gap-2 items-center h-10">
-            <img src="/~std660102/KadNangKgom/logo.jpg" alt="logo" className="w-10 rounded-full" />
+            <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="logo" className="w-10 rounded-full" />
             <p className="text-xl">กาดนั่งก้อม</p>
           </div>
           <div className="flex flex-row gap-5 items-center h-10">

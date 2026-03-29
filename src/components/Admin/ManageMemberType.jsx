@@ -138,7 +138,6 @@ function ManageMemberType() {
   const handleValidate = () => {
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
-      console.log(item);
       if (item === "memtype_id") {
         continue;
       } else if (formData[item] === "") {

@@ -90,7 +90,11 @@ function ManageAdmin() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value.trim() }));
+    if (name === "admin_addr") {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value.trim() }));
+    }
   };
 
   const handleAdminBirthChange = (value) => {

@@ -36,6 +36,11 @@ function Registration() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "trader_addr") {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value.trim() }));
+    }
     setFormData((prev) => {
       const updatedValue = type === "checkbox" ? checked : value;
       return {
