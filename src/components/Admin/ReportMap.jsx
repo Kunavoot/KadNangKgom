@@ -251,16 +251,16 @@ function ReportMap() {
           </div>
 
           <div className="space-y-3">
-            {reportMap.map((group) => (
+            {reportMap.map((item) => (
               <div
-                key={group.group}
+                key={item.group.group_name}
                 className="rounded bg-gray-100 p-2.5 min-h-[180px]"
               >
-                <div className="mb-2 rounded bg-[#65ef6e] px-3 py-1.5 text-2xl font-semibold">
-                  กลุ่มสังกัด : {group.group}
+                <div className="mb-2 rounded bg-[#65ef6e] px-3 py-1.5 text-lg font-semibold">
+                  {item.group.group_name} ({item.group.group_zone})
                 </div>
                 <div className="flex flex-wrap gap-2 pb-1">
-                  {group.stall.map((stall) => {
+                  {item.stall.map((stall) => {
                     return (
                       <button
                         type="button"
@@ -269,7 +269,8 @@ function ReportMap() {
                           setSelectedStall({
                             id: stall.stall_id,
                             status: stall.stall_status,
-                            group: group.group,
+                            group: item.group.group_name,
+                            zone: item.group.group_zone,
                             shop: stall.stall_shop,
                             ptype: stall.stall_ptype,
                             amgt: stall.stall_agmt,
@@ -378,6 +379,12 @@ function ReportMap() {
                 <span className="text-gray-500">กลุ่มสังกัด</span>
                 <span className="font-medium text-gray-800">
                   {selectedStall.group}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-gray-100 pb-2">
+                <span className="text-gray-500">ประเภทพื้นที่</span>
+                <span className="font-medium text-gray-800">
+                  {selectedStall.zone}
                 </span>
               </div>
               <div

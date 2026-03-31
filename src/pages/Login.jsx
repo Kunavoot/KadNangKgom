@@ -52,6 +52,7 @@ function Home() {
           });
           // เก็บข้อมูลผู้ใช้
           const userData = {
+            id: response.data.data.id,
             username: response.data.data.username,
             name: response.data.data.name,
             fullname: response.data.data.fullname,

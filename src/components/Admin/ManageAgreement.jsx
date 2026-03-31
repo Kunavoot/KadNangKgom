@@ -83,6 +83,8 @@ function ManageAgreement() {
   const handleOpenForm = (stall, group, filter) => {
     setSelectedStall(stall);
     console.log(stall);
+    console.log("id", user.id);
+    
 
     if (stall.market_rented === "1") {
       Swal.fire({
