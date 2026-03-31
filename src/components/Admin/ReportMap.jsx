@@ -241,11 +241,11 @@ function ReportMap() {
             })}
 
             <div className="ml-auto flex items-center gap-2 cursor-default">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#95e49b] text-[11px] font-medium text-black">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#95e49b] text-[11px] font-medium text-black">
                 ว่าง
               </span>
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#ff7e7e] text-[11px] font-medium text-black">
-                จอง
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#ff7e7e] text-[11px] font-medium text-black">
+                เช่าแล้ว
               </span>
             </div>
           </div>

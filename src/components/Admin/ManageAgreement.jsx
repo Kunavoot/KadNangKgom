@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import dayjs from "dayjs";
 import Loading from "../Loading";
 import axios from "axios";
@@ -8,130 +8,15 @@ import {
   toThaiDisplayDate,
 } from "../../utils/utils.jsx";
 import Swal from "sweetalert2";
-
-// const initialGroups = [
-//   {
-//     id: "g1",
-//     name: "ไก่",
-//     totalSlots: 5,
-//     rentedSlots: 2,
-//     stalls: [
-//       { id: "01001", status: "เช่าแล้ว" },
-//       { id: "01002", status: "เช่าแล้ว" },
-//       { id: "01003", status: "ว่าง" },
-//       { id: "01004", status: "ว่าง" },
-//       { id: "01005", status: "ว่าง" },
-//       { id: "01006", status: "ว่าง" },
-//       { id: "01007", status: "ว่าง" },
-//       { id: "01008", status: "ว่าง" },
-//       { id: "01009", status: "ว่าง" },
-//       { id: "01010", status: "ว่าง" },
-//     ],
-//   },
-//   {
-//     id: "g2",
-//     name: "ม้า",
-//     totalSlots: 5,
-//     rentedSlots: 2,
-//     stalls: [],
-//   },
-//   {
-//     id: "g3",
-//     name: "หนอน",
-//     totalSlots: 5,
-//     rentedSlots: 2,
-//     stalls: [],
-//   },
-//   {
-//     id: "g4",
-//     name: "นก",
-//     totalSlots: 5,
-//     rentedSlots: 2,
-//     stalls: [],
-//   },
-//   {
-//     id: "g5",
-//     name: "ปลา",
-//     totalSlots: 5,
-//     rentedSlots: 2,
-//     stalls: [],
-//   },
-// ];
-
-// const initialContracts = [
-//   {
-//     id: "000001",
-//     stallId: "01001",
-//     renterId: "0000000001",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-//   {
-//     id: "000002",
-//     stallId: "01003",
-//     renterId: "0000000002",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-//   {
-//     id: "000003",
-//     stallId: "01005",
-//     renterId: "0000000003",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-//   {
-//     id: "000004",
-//     stallId: "02001",
-//     renterId: "0000000004",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-//   {
-//     id: "000005",
-//     stallId: "03001",
-//     renterId: "0000000005",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-//   {
-//     id: "000005",
-//     stallId: "03001",
-//     renterId: "0000000005",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-//   {
-//     id: "000006",
-//     stallId: "03001",
-//     renterId: "0000000005",
-//     productType: "อาหาร",
-//     rent: "50.00",
-//     startDate: "01/07/2568",
-//     endDate: "31/06/2570",
-//   },
-// ];
-
-// const productTypes = ["อาหาร", "เสื้อผ้า", "ของใช้", "อุปกรณ์", "อื่นๆ"];
+import { useAuth } from "../../service/AuthContext.jsx";
 
 function ManageAgreement() {
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [view, setView] = useState("list");
-
+  
   // ข้อมูล
+  const { user } = useAuth();
   const [groups, setGroups] = useState([]);
   const [agreement_summary, setAgreement_Summary] = useState([]);
   const [agreement_detail, setAgreement_Detail] = useState([]);
@@ -213,7 +98,7 @@ function ManageAgreement() {
       group_id: group?.group_id || "",
       group_name: group?.group_name || "",
       agmt_trader: "",
-      agmt_admin: "",
+      agmt_admin: user?.id || "",
       agmt_status: filter?.status || "",
       agmt_start: filter?.startDate || "",
       agmt_end: filter?.endDate || "",
@@ -371,7 +256,8 @@ function ManageAgreement() {
           console.error("Error deleting agreement:", error);
           Swal.fire({
             icon: "error",
-            title: error.response.data.message || "เกิดข้อผิดพลาดในการยกเลิกสัญญา",
+            title:
+              error.response.data.message || "เกิดข้อผิดพลาดในการยกเลิกสัญญา",
             confirmButtonText: "ตกลง",
             confirmButtonColor: "#5bc06d",
           });

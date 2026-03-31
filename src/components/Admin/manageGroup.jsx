@@ -16,13 +16,13 @@ function ManageGroup() {
     group_id: "",
     group_name: "",
     group_detail: "",
+    group_zone: "",
   });
 
   const handleEdit = (item) => {
     setFormType("edit");
     setIsFrom(true);
     setSelectedItem(item);
-    console.log("Editing id:", item);
   };
 
   const handleDelete = (group_id) => {
@@ -186,6 +186,7 @@ function ManageGroup() {
         group_id: selectedItem.group_id || "",
         group_name: selectedItem.group_name || "",
         group_detail: selectedItem.group_detail || "",
+        group_zone: selectedItem.group_zone || "",
       });
       return;
     }
@@ -194,6 +195,7 @@ function ManageGroup() {
         group_id: "",
         group_name: "",
         group_detail: "",
+        group_zone: "",
       });
     }
   }, [formType, selectedItem]);
@@ -223,6 +225,7 @@ function ManageGroup() {
                   <th className="text-center w-[5%]"></th>
                   <th className="text-center w-[10%]">รหัส</th>
                   <th className="text-start w-[20%]">ชื่อกลุ่มสังกัด</th>
+                  <th className="text-start">ประเภทพื้นที่</th>
                   <th className="text-start">รายละเอียด</th>
                   <th className="text-center w-[20%]">ดำเนินการ</th>
                 </tr>
@@ -235,6 +238,7 @@ function ManageGroup() {
                       <th className="text-center">{index + 1}</th>
                       <td className="text-center">{item.group_id}</td>
                       <td className="text-start">{item.group_name}</td>
+                      <td className="text-start">{item.group_zone}</td>
                       <td className="text-start">{item.group_detail}</td>
                       <td className="text-center">
                         <button
@@ -304,7 +308,19 @@ function ManageGroup() {
                   placeholder="กรอกชื่อกลุ่มสังกัด"
                 />
               </div>
-              <div className="col-span-2">
+              <div>
+                <label className="label">
+                  <span className="label-text text-lg">ประเภทพื้นที่</span>
+                </label>
+                <input
+                  className="input input-bordered w-full"
+                  name="group_zone"
+                  value={formData.group_zone || ""}
+                  onChange={(e) => handleFormChange(e)}
+                  placeholder="กรอกประเภทพื้นที่"
+                />
+              </div>
+              <div>
                 <label className="label">
                   <span className="label-text text-lg">รายละเอียด</span>
                 </label>

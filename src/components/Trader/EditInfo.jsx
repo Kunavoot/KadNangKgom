@@ -6,11 +6,12 @@ import Swal from "sweetalert2";
 
 function EditInfo() {
   // จัดการหน้าเว็บ
-  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const uploadedImageUrlRef = useRef("");
   const uploadedTraderImageUrlRef = useRef("");
-
+  
+  // ข้อมูล
+  const { user } = useAuth();
   const [formData, setFormData] = useState([]);
   const [originalData, setOriginalData] = useState([]);
   const [imagePreview, setImagePreview] = useState("");
@@ -236,10 +237,11 @@ function EditInfo() {
                 <span className="label-text text-lg">ชื่อร้านค้า</span>
               </label>
               <input
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-gray-200"
                 name="trader_shop"
                 value={formData.trader_shop || ""}
                 onChange={handleFormChange}
+                disabled
               />
             </div>
 
@@ -262,10 +264,11 @@ function EditInfo() {
                   <span className="label-text text-lg">คำนำหน้า</span>
                 </label>
                 <select
-                  className="select select-bordered w-full"
+                  className="select select-bordered w-full bg-gray-200"
                   name="trader_pname"
                   value={formData.trader_pname || ""}
                   onChange={handleFormChange}
+                  disabled
                 >
                   <option value="" disabled>
                     เลือกคำนำหน้า
@@ -282,11 +285,12 @@ function EditInfo() {
                   <span className="label-text text-lg">ชื่อ</span>
                 </label>
                 <input
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full bg-gray-200"
                   name="trader_name"
                   value={formData.trader_name || ""}
                   onChange={handleFormChange}
                   placeholder="ชื่อ"
+                  disabled
                 />
               </div>
             </div>
@@ -296,11 +300,12 @@ function EditInfo() {
                 <span className="label-text text-lg">นามสกุล</span>
               </label>
               <input
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-gray-200"
                 name="trader_sname"
                 value={formData.trader_sname || ""}
                 onChange={handleFormChange}
                 placeholder="นามสกุล"
+                disabled
               />
             </div>
 
