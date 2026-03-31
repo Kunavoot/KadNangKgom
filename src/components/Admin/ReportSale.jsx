@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import Loading from "../Loading";
 import axios from "axios";
-import { formatCurrency } from "../../utils/utils";
+import { formatCurrency, BuddhistDatePicker } from "../../utils/utils";
 
 const reportTypes = [
   { key: "data_group", text: "กลุ่มสังกัด" },
@@ -13,9 +13,13 @@ function ReportSale() {
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [activeType, setActiveType] = useState("data_group");
+  const [selectedReportType, setSelectedReportType] = useState("day");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState("3");
+  const [selectedSellDay, setSelectedSellDay] = useState("3");
+  const [selectedStartDate, setSelectedStartDate] = useState(new Date());
+  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
 
   // ข้อมูล
   const [reportSale, setReportSale] = useState([]);
@@ -43,7 +47,8 @@ function ReportSale() {
   ];
 
   const activeReport = reportSale?.[activeType] || null;
-  const activeLabelText = reportTypes.find((t) => t.key === activeType)?.text || "";
+  const activeLabelText =
+    reportTypes.find((t) => t.key === activeType)?.text || "";
 
   const rows = useMemo(() => {
     if (!activeReport) return [];
@@ -80,10 +85,10 @@ function ReportSale() {
     const rowMarkup =
       activeType === "data_3shop"
         ? rows
-            .map(
-              (groupEntry, index) => {
-                const isPageBreak = (index + 1) % 5 === 0 && index !== rows.length - 1;
-                return `
+            .map((groupEntry, index) => {
+              const isPageBreak =
+                (index + 1) % 5 === 0 && index !== rows.length - 1;
+              return `
           <tr>
             <td rowspan="3">${groupEntry.group}</td>
             <td class="text-start">1. ${groupEntry.shops[0].shop_name}</td>
@@ -97,15 +102,14 @@ function ReportSale() {
             <td class="text-end">${formatCurrency(groupEntry.shops[1].month_amount)}</td>
             <td class="text-end">${formatCurrency(groupEntry.shops[1].year_amount)}</td>
           </tr>
-          <tr class="${isPageBreak ? 'page-break' : ''}">
+          <tr class="${isPageBreak ? "page-break" : ""}">
             <td class="text-start">3. ${groupEntry.shops[2].shop_name}</td>
             <td class="text-end">${formatCurrency(groupEntry.shops[2].week_amount)}</td>
             <td class="text-end">${formatCurrency(groupEntry.shops[2].month_amount)}</td>
             <td class="text-end">${formatCurrency(groupEntry.shops[2].year_amount)}</td>
           </tr>
         `;
-              }
-            )
+            })
             .join("")
         : rows
             .map(
@@ -196,7 +200,7 @@ function ReportSale() {
           <table>
             <thead>
               <tr>
-                <th style="${activeType === 'data_3shop' ? 'width: 20%;' : 'width: 40%;'}">
+                <th style="${activeType === "data_3shop" ? "width: 20%;" : "width: 40%;"}">
                   ${activeType === "data_3shop" ? "กลุ่มสังกัด" : activeLabelText}
                 </th>
                 ${
@@ -320,6 +324,53 @@ function ReportSale() {
               </span>
 
               <div className="flex items-center gap-2">
+                <label className="font-medium whitespace-nowrap">ประเภทรายงาน</label>
+                <select
+                  className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
+                  value={selectedReportType}
+                  onChange={(e) => setSelectedReportType(e.target.value)}
+                >
+                  <option disabled selected value="">เลือกประเภทรายงาน</option>
+                  <option value="day">รายวัน</option>
+                  <option value="week">รายสัปดาห์</option>
+                  <option value="month">รายเดือน</option>
+                  <option value="year">รายปี</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="font-medium whitespace-nowrap">วันที่ขาย</label>
+                <select
+                  className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
+                  value={selectedSellDay}
+                  onChange={(e) => setSelectedSellDay(e.target.value)}
+                >
+                  {days.map((d) => (
+                    <option key={d.key} value={d.key}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <label className="font-medium whitespace-nowrap pr-2">วันที่</label>
+                <BuddhistDatePicker
+                  value={selectedStartDate}
+                  onChange={(e) => setSelectedStartDate(e.target.value)}
+                  className="w-45"
+                />
+              </div>
+
+              <div className="flex items-center">
+                <label className="font-medium whitespace-nowrap pr-2">ถึงวันที่</label>
+                <BuddhistDatePicker
+                  value={selectedEndDate}
+                  onChange={(e) => setSelectedEndDate(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
                 <label className="font-medium whitespace-nowrap">ปี</label>
                 <select
                   className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
@@ -348,30 +399,17 @@ function ReportSale() {
                   ))}
                 </select>
               </div>
-
-              <div className="flex items-center gap-2">
-                <label className="font-medium whitespace-nowrap">วัน</label>
-                <select
-                  className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
-                  value={selectedDay}
-                  onChange={(e) => setSelectedDay(e.target.value)}
-                >
-                  {days.map((d) => (
-                    <option key={d.key} value={d.key}>
-                      {d.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           </div>
         </div>
 
         <div className="overflow-x-auto max-h-120 pb-4">
           <table className="table min-w-[900px] border-collapse">
-            <thead className="sticky top-0 z-10">
+            <thead className="sticky top-0">
               <tr className="bg-[#71FF7A]">
-                <th className={`${activeType === "data_3shop" ? "w-[20%]" : "w-[40%]"} text-center`}>
+                <th
+                  className={`${activeType === "data_3shop" ? "w-[20%]" : "w-[40%]"} text-center`}
+                >
                   {activeType === "data_3shop"
                     ? "กลุ่มสังกัด"
                     : activeLabelText}
@@ -388,68 +426,78 @@ function ReportSale() {
             </thead>
             {activeType === "data_3shop" ? (
               rows.map((groupEntry) => (
-                <tbody key={groupEntry.group} className="group border-none">
-                  <tr className="border-b border-gray-100 group-hover:bg-gray-100">
-                    <td
-                      className="border-b border-gray-100 text-start align-middle"
-                      rowSpan={3}
-                    >
-                      {groupEntry.group}
-                    </td>
-                    <td className="border-b border-gray-100 text-start">
-                      1. {groupEntry.shops[0].shop_name}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[0].week_amount)}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[0].month_amount)}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[0].year_amount)}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100 group-hover:bg-gray-100">
-                    <td className="border-b border-gray-100 text-start">
-                      2. {groupEntry.shops[1].shop_name}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[1].week_amount)}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[1].month_amount)}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[1].year_amount)}
-                    </td>
-                  </tr>
-                  <tr className="border-b border-gray-100 group-hover:bg-gray-100">
-                    <td className="border-b border-gray-100 text-start">
-                      3. {groupEntry.shops[2].shop_name}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[2].week_amount)}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[2].month_amount)}
-                    </td>
-                    <td className="border-b border-gray-100 text-end">
-                      {formatCurrency(groupEntry.shops[2].year_amount)}
-                    </td>
-                  </tr>
-                </tbody>
+                <>
+                  <tbody key={groupEntry.group} className="group border-none">
+                    <tr className="border-b border-gray-100 group-hover:bg-gray-100">
+                      <td
+                        className="border-b border-gray-100 text-start align-middle"
+                        rowSpan={3}
+                      >
+                        {groupEntry.group}
+                      </td>
+                      <td className="border-b border-gray-100 text-start">
+                        1. {groupEntry.shops[0].shop_name}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[0].week_amount)}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[0].month_amount)}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[0].year_amount)}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100 group-hover:bg-gray-100">
+                      <td className="border-b border-gray-100 text-start">
+                        2. {groupEntry.shops[1].shop_name}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[1].week_amount)}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[1].month_amount)}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[1].year_amount)}
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-100 group-hover:bg-gray-100">
+                      <td className="border-b border-gray-100 text-start">
+                        3. {groupEntry.shops[2].shop_name}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[2].week_amount)}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[2].month_amount)}
+                      </td>
+                      <td className="border-b border-gray-100 text-end">
+                        {formatCurrency(groupEntry.shops[2].year_amount)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </>
               ))
             ) : (
-              <tbody className="border-none">
-                {rows.map((row) => (
-                  <tr key={row.name} className="hover:bg-gray-100">
-                    <td className="text-center">{row.name}</td>
-                    <td className="text-end">{formatCurrency(row.week_amount)}</td>
-                    <td className="text-end">{formatCurrency(row.month_amount)}</td>
-                    <td className="text-end">{formatCurrency(row.year_amount)}</td>
-                  </tr>
-                ))}
-              </tbody>
+              <>
+                <tbody className="border-none">
+                  {rows.map((row) => (
+                    <tr key={row.name} className="hover:bg-gray-100">
+                      <td className="text-center">{row.name}</td>
+                      <td className="text-end">
+                        {formatCurrency(row.week_amount)}
+                      </td>
+                      <td className="text-end">
+                        {formatCurrency(row.month_amount)}
+                      </td>
+                      <td className="text-end">
+                        {formatCurrency(row.year_amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </>
             )}
             {activeType !== "data_3shop" && (
               <tfoot>
