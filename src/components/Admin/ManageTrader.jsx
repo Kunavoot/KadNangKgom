@@ -10,6 +10,7 @@ function ManageTrader() {
   const [isForm, setIsFrom] = useState(false);
   const [formType, setFormType] = useState(""); // Add, Edit สำหรับจัดการฟอร์ม
   const [visiblePasswordId, setVisiblePasswordId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // ข้อมูล
   const [prefix, setPrefix] = useState([]);
@@ -43,12 +44,10 @@ function ManageTrader() {
     trader_date: "",
     trader_status: "1", // 1 = กำลังค้าขาย, 0 = สิ้นสุดการค้า
   });
-
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedTraderFile, setSelectedTraderFile] = useState(null);
   const [previewTraderImage, setPreviewTraderImage] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState("");
 
   const handleEdit = (item) => {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Loading from "../Loading";
 import axios from "axios";
 import { BuddhistDatePicker } from "../../utils/utils.jsx";
+import dayjs from "dayjs";
 import Swal from "sweetalert2";
 
 function ManageAdmin() {
@@ -34,7 +35,6 @@ function ManageAdmin() {
     setFormType("edit");
     setIsFrom(true);
     setSelectedItem(item);
-    console.log("Editing id:", item);
   };
 
   const handleDelete = (admin_no) => {
@@ -160,6 +160,24 @@ function ManageAdmin() {
       setIsLoading(false);
       return false;
     }
+    const today = new Date();
+    const birthDate = new Date(formData.admin_birth);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const isBeforeBirthday =
+      today.getMonth() < birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() < birthDate.getDate());
+    const actualAge = isBeforeBirthday ? age - 1 : age;
+    if (actualAge < 20) {
+      Swal.fire({
+        icon: "error",
+        title: "อายุต้องไม่ต่ำกว่า 20 ปี",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
     if (formData.admin_birth > formData.admin_date) {
       Swal.fire({
         icon: "error",
@@ -188,6 +206,8 @@ function ManageAdmin() {
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
+        handleBackToList();
+        getAdmin();
       } catch (error) {
         console.error("Error adding admin:", error);
         Swal.fire({
@@ -197,8 +217,6 @@ function ManageAdmin() {
           confirmButtonColor: "#5bc06d",
         });
       } finally {
-        getAdmin();
-        handleBackToList();
         setIsLoading(false);
       }
     } else if (formType === "edit" && selectedItem) {
@@ -215,6 +233,8 @@ function ManageAdmin() {
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
+        handleBackToList();
+        getAdmin();
       } catch (error) {
         console.error("Error adding admin:", error);
         Swal.fire({
@@ -224,8 +244,6 @@ function ManageAdmin() {
           confirmButtonColor: "#5bc06d",
         });
       } finally {
-        getAdmin();
-        handleBackToList();
         setIsLoading(false);
       }
     }
@@ -276,7 +294,7 @@ function ManageAdmin() {
         admin_gender: selectedItem.admin_gender || "",
         admin_tel: selectedItem.admin_tel || "",
         admin_addr: selectedItem.admin_addr || "",
-        admin_date: selectedItem.admin_date || "",
+        admin_date: selectedItem.admin_date || dayjs().format("YYYY-MM-DD"),
         admin_un: selectedItem.admin_un || "",
         admin_pw: selectedItem.admin_pw || "",
       });
@@ -293,7 +311,7 @@ function ManageAdmin() {
         admin_gender: "",
         admin_tel: "",
         admin_addr: "",
-        admin_date: "",
+        admin_date: dayjs().format("YYYY-MM-DD"),
         admin_un: "",
         admin_pw: "",
       });
@@ -523,6 +541,7 @@ function ManageAdmin() {
                   name="admin_tel"
                   value={formData.admin_tel || ""}
                   onChange={(e) => handleFormChange(e)}
+                  maxLength={10}
                   placeholder="กรอกเบอร์โทรศัพท์"
                 />
               </div>

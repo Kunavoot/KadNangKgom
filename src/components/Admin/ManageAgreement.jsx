@@ -346,7 +346,7 @@ function ManageAgreement() {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#c2c2c2ff",
-      confirmButtonText: "ยกเลิก",
+      confirmButtonText: "ลบ",
       cancelButtonText: "ยกเลิก",
     }).then(async (result) => {
       if (result.isConfirmed) {

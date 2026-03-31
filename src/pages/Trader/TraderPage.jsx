@@ -19,7 +19,7 @@ function TraderPage() {
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#5bc06d",
       });
-      navigate("/");
+      navigate("/login");
     } else if (user.role !== "trader") {
       Swal.fire({
         icon: "error",
@@ -27,7 +27,7 @@ function TraderPage() {
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#5bc06d",
       });
-      navigate("/");
+      navigate("/login");
     }
   }, []);
 
@@ -56,13 +56,6 @@ function TraderPage() {
           <div className="drawer md:drawer-open h-full">
             <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
             <div className="drawer-content h-full w-full p-4">
-              {/* Page content here */}
-              {/* <label
-                htmlFor="my-drawer-3"
-                className="btn drawer-button lg:hidden"
-              >
-                Open drawer
-              </label> */}
               {isPage === "" && (
                 <div className="h-full flex justify-center items-center">
                   <div className="text-4xl font-bold text-gray-400 text-center">
