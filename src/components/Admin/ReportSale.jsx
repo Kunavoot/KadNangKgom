@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, Fragment } from "react";
 import Loading from "../Loading";
 import axios from "axios";
 import { formatCurrency, BuddhistDatePicker } from "../../utils/utils";
@@ -6,7 +6,12 @@ import { formatCurrency, BuddhistDatePicker } from "../../utils/utils";
 const reportTypes = [
   { key: "data_group", text: "กลุ่มสังกัด" },
   { key: "data_ptype", text: "ประเภทสินค้า" },
-  { key: "data_3shop", text: "ร้านค้ายอดนิยม 3 อันดับ" },
+];
+
+const days = [
+  { key: "1", label: "เสาร์" },
+  { key: "2", label: "อาทิตย์" },
+  { key: "3", label: "เสาร์-อาทิตย์" },
 ];
 
 function ReportSale() {
@@ -14,60 +19,22 @@ function ReportSale() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeType, setActiveType] = useState("data_group");
   const [selectedReportType, setSelectedReportType] = useState("day");
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [selectedDay, setSelectedDay] = useState("3");
   const [selectedSellDay, setSelectedSellDay] = useState("3");
-  const [selectedStartDate, setSelectedStartDate] = useState(new Date());
-  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
+  const [selectedStartDate, setSelectedStartDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedEndDate, setSelectedEndDate] = useState(new Date().toISOString().split("T")[0]);
 
   // ข้อมูล
   const [reportSale, setReportSale] = useState([]);
 
-  const currentYear = new Date().getFullYear();
-  const years = [...Array.from({ length: 5 }, (_, i) => currentYear - i)];
-  const months = [
-    { key: "1", label: "มกราคม" },
-    { key: "2", label: "กุมภาพันธ์" },
-    { key: "3", label: "มีนาคม" },
-    { key: "4", label: "เมษายน" },
-    { key: "5", label: "พฤษภาคม" },
-    { key: "6", label: "มิถุนายน" },
-    { key: "7", label: "กรกฎาคม" },
-    { key: "8", label: "สิงหาคม" },
-    { key: "9", label: "กันยายน" },
-    { key: "10", label: "ตุลาคม" },
-    { key: "11", label: "พฤศจิกายน" },
-    { key: "12", label: "ธันวาคม" },
-  ];
-  const days = [
-    { key: "1", label: "เสาร์" },
-    { key: "2", label: "อาทิตย์" },
-    { key: "3", label: "เสาร์-อาทิตย์" },
-  ];
-
-  const activeReport = reportSale?.[activeType] || null;
   const activeLabelText =
     reportTypes.find((t) => t.key === activeType)?.text || "";
 
-  const rows = useMemo(() => {
-    if (!activeReport) return [];
-    if (activeType === "data_3shop") return activeReport || [];
-    return activeReport || [];
-  }, [activeReport, activeType]);
-
-  const totals = useMemo(
-    () =>
-      rows.reduce(
-        (acc, row) => ({
-          week_amount: acc.week_amount + (row.week_amount || 0),
-          month_amount: acc.month_amount + (row.month_amount || 0),
-          year_amount: acc.year_amount + (row.year_amount || 0),
-        }),
-        { week_amount: 0, month_amount: 0, year_amount: 0 },
-      ),
-    [rows],
-  );
+  const totals = useMemo(() => {
+    return reportSale.reduce((sum, periodData) => {
+      const items = periodData[activeType] || [];
+      return sum + items.reduce((acc, item) => acc + (item.amount || 0), 0);
+    }, 0);
+  }, [reportSale, activeType]);
 
   const handlePrint = () => {
     const popup = window.open("", "_blank", "width=1024,height=768");
@@ -76,53 +43,27 @@ function ReportSale() {
       return;
     }
 
-    const yearText = `ปี ${parseInt(selectedYear) + 543}`;
-    const monthText = `เดือน${months.find((m) => m.key == selectedMonth)?.label}`;
-    const dayText = `วัน${days.find((d) => d.key === selectedDay)?.label}`;
+    // const subHeaderText = `ประจำ${monthText} ${yearText} (${dayText})`;
 
-    const subHeaderText = `ประจำ${monthText} ${yearText} (${dayText})`;
-
-    const rowMarkup =
-      activeType === "data_3shop"
-        ? rows
-            .map((groupEntry, index) => {
-              const isPageBreak =
-                (index + 1) % 5 === 0 && index !== rows.length - 1;
-              return `
-          <tr>
-            <td rowspan="3">${groupEntry.group}</td>
-            <td class="text-start">1. ${groupEntry.shops[0].shop_name}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[0].week_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[0].month_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[0].year_amount)}</td>
+    const rowMarkup = reportSale
+      .map(
+        (periodData) => `
+          <tr style="background-color: #f9f9f9; font-weight: bold;">
+            <td colspan="2" class="text-center">รอบ/วันที่: ${periodData.period}</td>
           </tr>
-          <tr>
-            <td class="text-start">2. ${groupEntry.shops[1].shop_name}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[1].week_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[1].month_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[1].year_amount)}</td>
-          </tr>
-          <tr class="${isPageBreak ? "page-break" : ""}">
-            <td class="text-start">3. ${groupEntry.shops[2].shop_name}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[2].week_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[2].month_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[2].year_amount)}</td>
-          </tr>
-        `;
-            })
-            .join("")
-        : rows
+          ${periodData[activeType]
             .map(
-              (row) => `
-          <tr>
-            <td>${row.name}</td>
-            <td class="text-end">${formatCurrency(row.week)}</td>
-            <td class="text-end">${formatCurrency(row.month)}</td>
-            <td class="text-end">${formatCurrency(row.year)}</td>
-          </tr>
-        `,
+              (item) => `
+              <tr>
+                <td>${item.name}</td>
+                <td class="text-end">${formatCurrency(item.amount)}</td>
+              </tr>
+            `,
             )
-            .join("");
+            .join("")}
+        `,
+      )
+      .join("");
 
     popup.document.write(`
       <html>
@@ -200,34 +141,17 @@ function ReportSale() {
           <table>
             <thead>
               <tr>
-                <th style="${activeType === "data_3shop" ? "width: 20%;" : "width: 40%;"}">
-                  ${activeType === "data_3shop" ? "กลุ่มสังกัด" : activeLabelText}
-                </th>
-                ${
-                  activeType === "data_3shop"
-                    ? `<th style="width: 20%;">ชื่อร้านค้า</th>`
-                    : ""
-                }
-                <th style="width: 20%;">รายสัปดาห์</th>
-                <th style="width: 20%;">รายเดือน</th>
-                <th style="width: 20%;">รายปี</th>
+                <th style="width: 70%;">${activeLabelText}</th>
+                <th style="width: 30%;">ยอดขาย</th>
               </tr>
             </thead>
             <tbody>${rowMarkup}</tbody>
-            ${
-              activeType === "data_3shop"
-                ? ""
-                : `
             <tfoot>
               <tr>
                 <td>รวม</td>
-                <td class="text-end">${formatCurrency(totals.week_amount)}</td>
-                <td class="text-end">${formatCurrency(totals.month_amount)}</td>
-                <td class="text-end">${formatCurrency(totals.year_amount)}</td>
+                <td class="text-end">${formatCurrency(totals)}</td>
               </tr>
             </tfoot>
-            `
-            }
           </table>
           <script>
             window.onload = function() {
@@ -249,12 +173,15 @@ function ReportSale() {
         import.meta.env.VITE_API_URL + "/admin/getReportSale",
         {
           params: {
-            year: selectedYear,
-            month: selectedMonth,
-            sell_day: selectedDay,
+            report_type: selectedReportType,
+            sell_day: selectedSellDay,
+            start_date: selectedStartDate.split("T")[0],
+            end_date: selectedEndDate.split("T")[0],
           },
         },
       );
+      console.log(response.data);
+      
       setReportSale(response.data.data);
     } catch (error) {
       console.error("Error fetching report sale:", error);
@@ -265,7 +192,7 @@ function ReportSale() {
 
   useEffect(() => {
     getReportSale();
-  }, [selectedYear, selectedMonth, selectedDay]);
+  }, [selectedReportType, selectedSellDay, selectedStartDate, selectedEndDate]);
 
   return (
     <>
@@ -324,13 +251,17 @@ function ReportSale() {
               </span>
 
               <div className="flex items-center gap-2">
-                <label className="font-medium whitespace-nowrap">ประเภทรายงาน</label>
+                <label className="font-medium whitespace-nowrap">
+                  ประเภทรายงาน
+                </label>
                 <select
                   className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
                   value={selectedReportType}
                   onChange={(e) => setSelectedReportType(e.target.value)}
                 >
-                  <option disabled selected value="">เลือกประเภทรายงาน</option>
+                  <option disabled value="">
+                    เลือกประเภทรายงาน
+                  </option>
                   <option value="day">รายวัน</option>
                   <option value="week">รายสัปดาห์</option>
                   <option value="month">รายเดือน</option>
@@ -339,7 +270,9 @@ function ReportSale() {
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="font-medium whitespace-nowrap">วันที่ขาย</label>
+                <label className="font-medium whitespace-nowrap">
+                  วันที่ขาย
+                </label>
                 <select
                   className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
                   value={selectedSellDay}
@@ -354,50 +287,25 @@ function ReportSale() {
               </div>
 
               <div className="flex items-center">
-                <label className="font-medium whitespace-nowrap pr-2">วันที่</label>
+                <label className="font-medium whitespace-nowrap pr-2">
+                  วันที่
+                </label>
                 <BuddhistDatePicker
                   value={selectedStartDate}
-                  onChange={(e) => setSelectedStartDate(e.target.value)}
+                  onChange={setSelectedStartDate}
                   className="w-45"
                 />
               </div>
 
               <div className="flex items-center">
-                <label className="font-medium whitespace-nowrap pr-2">ถึงวันที่</label>
+                <label className="font-medium whitespace-nowrap pr-2">
+                  ถึงวันที่
+                </label>
                 <BuddhistDatePicker
                   value={selectedEndDate}
-                  onChange={(e) => setSelectedEndDate(e.target.value)}
+                  onChange={setSelectedEndDate}
+                  minDate={selectedStartDate}
                 />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <label className="font-medium whitespace-nowrap">ปี</label>
-                <select
-                  className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                >
-                  {years.map((y) => (
-                    <option key={y} value={y}>
-                      {parseInt(y) + 543}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <label className="font-medium whitespace-nowrap">เดือน</label>
-                <select
-                  className="select select-bordered min-h-11 h-11 w-30 rounded-xl bg-white"
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                >
-                  {months.map((m) => (
-                    <option key={m.key} value={m.key}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>
@@ -407,114 +315,37 @@ function ReportSale() {
           <table className="table min-w-[900px] border-collapse">
             <thead className="sticky top-0">
               <tr className="bg-[#71FF7A]">
-                <th
-                  className={`${activeType === "data_3shop" ? "w-[20%]" : "w-[40%]"} text-center`}
-                >
-                  {activeType === "data_3shop"
-                    ? "กลุ่มสังกัด"
-                    : activeLabelText}
-                </th>
-                {activeType === "data_3shop" ? (
-                  <th className="w-[20%] text-center">ชื่อร้านค้า</th>
-                ) : (
-                  ""
-                )}
-                <th className="w-[20%] text-center">รายสัปดาห์</th>
-                <th className="w-[20%] text-center">รายเดือน</th>
-                <th className="w-[20%] text-center">รายปี</th>
+                <th className="w-[70%] text-center">{activeLabelText}</th>
+                <th className="w-[30%] text-center">จำนวนเงิน</th>
               </tr>
             </thead>
-            {activeType === "data_3shop" ? (
-              rows.map((groupEntry) => (
-                <>
-                  <tbody key={groupEntry.group} className="group border-none">
-                    <tr className="border-b border-gray-100 group-hover:bg-gray-100">
-                      <td
-                        className="border-b border-gray-100 text-start align-middle"
-                        rowSpan={3}
-                      >
-                        {groupEntry.group}
-                      </td>
-                      <td className="border-b border-gray-100 text-start">
-                        1. {groupEntry.shops[0].shop_name}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[0].week_amount)}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[0].month_amount)}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[0].year_amount)}
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-100 group-hover:bg-gray-100">
-                      <td className="border-b border-gray-100 text-start">
-                        2. {groupEntry.shops[1].shop_name}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[1].week_amount)}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[1].month_amount)}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[1].year_amount)}
-                      </td>
-                    </tr>
-                    <tr className="border-b border-gray-100 group-hover:bg-gray-100">
-                      <td className="border-b border-gray-100 text-start">
-                        3. {groupEntry.shops[2].shop_name}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[2].week_amount)}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[2].month_amount)}
-                      </td>
-                      <td className="border-b border-gray-100 text-end">
-                        {formatCurrency(groupEntry.shops[2].year_amount)}
-                      </td>
-                    </tr>
-                  </tbody>
-                </>
-              ))
-            ) : (
-              <>
-                <tbody className="border-none">
-                  {rows.map((row) => (
-                    <tr key={row.name} className="hover:bg-gray-100">
-                      <td className="text-center">{row.name}</td>
-                      <td className="text-end">
-                        {formatCurrency(row.week_amount)}
-                      </td>
-                      <td className="text-end">
-                        {formatCurrency(row.month_amount)}
-                      </td>
-                      <td className="text-end">
-                        {formatCurrency(row.year_amount)}
+            <tbody className="border-none">
+              {reportSale.map((periodData, pIndex) => (
+                <Fragment key={pIndex}>
+                  <tr className="bg-gray-100 font-bold border-b-2 border-gray-300">
+                    <td colSpan="2" className="text-center py-2">
+                       รอบ/วันที่: {periodData.period}
+                    </td>
+                  </tr>
+                  {periodData[activeType].map((item, iIndex) => (
+                    <tr key={`${pIndex}-${iIndex}`} className="hover:bg-gray-50 border-b border-gray-100">
+                      <td className="text-center py-2">{item.name}</td>
+                      <td className="text-end py-2 pr-10">
+                        {formatCurrency(item.amount)}
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </>
-            )}
-            {activeType !== "data_3shop" && (
-              <tfoot>
-                <tr className="bg-[#71FF7A]">
-                  <td className="text-center font-bold">รวม</td>
-                  <td className="text-end font-bold">
-                    {formatCurrency(totals.week_amount)}
-                  </td>
-                  <td className="text-end font-bold">
-                    {formatCurrency(totals.month_amount)}
-                  </td>
-                  <td className="text-end font-bold">
-                    {formatCurrency(totals.year_amount)}
-                  </td>
-                </tr>
-              </tfoot>
-            )}
+                </Fragment>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="bg-[#71FF7A]">
+                <td className="text-center font-bold">รวม</td>
+                <td className="text-end font-bold pr-10">
+                  {formatCurrency(totals)}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

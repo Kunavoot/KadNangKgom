@@ -8,6 +8,7 @@ import ManageMarket from "../../components/Admin/ManageMarket";
 import ManageProductType from "../../components/Admin/ManageProductType";
 import ManageAgreement from "../../components/Admin/ManageAgreement";
 import ReportSale from "../../components/Admin/ReportSale";
+import Report3Shop from "../../components/Admin/Report3Shop";
 import ReportMap from "../../components/Admin/ReportMap";
 import Swal from "sweetalert2";
 import { useAuth } from "../../service/AuthContext.jsx";
@@ -78,6 +79,7 @@ function AdminPage() {
               {isPage === "manageProductType" && <ManageProductType />}
               {isPage === "manageAgreement" && <ManageAgreement />}
               {isPage === "reportSale" && <ReportSale />}
+              {isPage === "report3Shop" && <Report3Shop />}
               {isPage === "reportMap" && <ReportMap />}
             </div>
 
@@ -180,6 +182,14 @@ function AdminPage() {
                       onClick={() => setIsPage("reportSale")}
                     >
                       ยอดขาย
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className={isPage === "report3Shop" ? "bg-[#71FF7A]" : ""}
+                      onClick={() => setIsPage("report3Shop")}
+                    >
+                      ร้านค้ายอดนิยม 3 อันดับ
                     </a>
                   </li>
                   <li>
