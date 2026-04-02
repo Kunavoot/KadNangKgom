@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, Fragment } from "react";
 import Loading from "../Loading";
 import axios from "axios";
-import { formatCurrency, BuddhistDatePicker } from "../../utils/utils";
+import { formatCurrency, formatReportPeriod, BuddhistDatePicker, toThaiDisplayDate } from "../../utils/utils";
 
 const reportTypes = [
   { key: "data_group", text: "กลุ่มสังกัด" },
@@ -43,13 +43,20 @@ function ReportSale() {
       return;
     }
 
-    // const subHeaderText = `ประจำ${monthText} ${yearText} (${dayText})`;
+    const reportTypeText = 
+      selectedReportType === "day" ? "รายวัน" :
+      selectedReportType === "week" ? "รายสัปดาห์" :
+      selectedReportType === "month" ? "รายเดือน" :
+      selectedReportType === "year" ? "รายปี" : "";
+
+    const dayLabel = days.find(d => d.key === selectedSellDay)?.label || "";
+    const subHeaderText = `รายงานยอดขาย${reportTypeText} ประจำวันที่ ${toThaiDisplayDate(selectedStartDate)} ถึง ${toThaiDisplayDate(selectedEndDate)} (${dayLabel})`;
 
     const rowMarkup = reportSale
       .map(
         (periodData) => `
           <tr style="background-color: #f9f9f9; font-weight: bold;">
-            <td colspan="2" class="text-center">รอบ/วันที่: ${periodData.period}</td>
+            <td colspan="2" class="text-left">รอบ/วันที่: ${formatReportPeriod(periodData.period, selectedReportType)}</td>
           </tr>
           ${periodData[activeType]
             .map(
@@ -165,6 +172,8 @@ function ReportSale() {
 
     popup.document.close();
   };
+
+  
 
   const getReportSale = async () => {
     try {
@@ -323,8 +332,8 @@ function ReportSale() {
               {reportSale.map((periodData, pIndex) => (
                 <Fragment key={pIndex}>
                   <tr className="bg-gray-100 font-bold border-b-2 border-gray-300">
-                    <td colSpan="2" className="text-center py-2">
-                       รอบ/วันที่: {periodData.period}
+                    <td colSpan="2" className="text-left py-2">
+                       รอบ/วันที่: {formatReportPeriod(periodData.period, selectedReportType)}
                     </td>
                   </tr>
                   {periodData[activeType].map((item, iIndex) => (

@@ -179,3 +179,24 @@ export const formatCurrency = (value) => {
     useGrouping: true, // บังคับให้ใส่ comma
   });
 };
+
+export const formatReportPeriod = (period, type) => {
+  if (!period) return "-";
+
+  if (type === "day") {
+    return dayjs(period).format("DD/MM/BBBB");
+  } else if (type === "week") {
+    // แยกกรณีช่วงวัน "YYYY-MM-DD - YYYY-MM-DD"
+    const dates = String(period).split(" - ");
+    if (dates.length === 2) {
+      return `${dayjs(dates[0]).format("DD/MM/BBBB")} - ${dayjs(dates[1]).format("DD/MM/BBBB")}`;
+    }
+    return dayjs(period).format("DD/MM/BBBB");
+  } else if (type === "month") {
+    return dayjs(period).format("MM/BBBB");
+  } else if (type === "year") {
+    return dayjs(period).format("BBBB");
+  }
+
+  return period;
+};
