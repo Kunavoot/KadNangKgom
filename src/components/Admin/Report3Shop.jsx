@@ -1,9 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
 import Loading from "../Loading";
 import axios from "axios";
-import { formatCurrency, BuddhistDatePicker } from "../../utils/utils";
+import { formatCurrency, BuddhistDatePicker, toThaiDisplayDate, toThaiDisplayDateTime } from "../../utils/utils";
+import { useAuth } from "../../service/AuthContext";
 
 function Report3Shop() {
+  const { user } = useAuth();
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -41,137 +43,205 @@ function Report3Shop() {
   }, [reportSale]);
 
   const handlePrint = () => {
-    const popup = window.open("", "_blank", "width=1024,height=768");
-    if (!popup) {
-      window.print();
-      return;
+    let iframe = document.getElementById("print-iframe");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "print-iframe";
+      iframe.style.position = "absolute";
+      iframe.style.top = "-10000px";
+      iframe.style.left = "-10000px";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
     }
 
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+    // ข้อมูลสำหรับรายงาน
+    const printDate = toThaiDisplayDateTime(new Date().toISOString());
     const yearText = `ปี ${parseInt(selectedYear) + 543}`;
-    const monthText = `เดือน${months.find((m) => m.key == selectedMonth)?.label}`;
-    const dayText = `วัน${days.find((d) => d.key === selectedDay)?.label}`;
+    const monthText = `${months.find((m) => m.key == selectedMonth)?.label}`;
+    const dayLabel = days.find((d) => d.key === selectedDay)?.label || "";
+    const periodText = `ประจำเดือน${monthText} ${yearText} (${dayLabel})`;
 
-    const subHeaderText = `ประจำ${monthText} ${yearText} (${dayText})`;
-
-    const rowMarkup = rows
-      .map((groupEntry, index) => {
-        const isPageBreak = (index + 1) % 5 === 0 && index !== rows.length - 1;
-        return `
+    let rowMarkup = "";
+    if (!rows || rows.length === 0) {
+      rowMarkup = "<tr><td colspan='3' class='text-center'>ไม่พบข้อมูล</td></tr>";
+    } else {
+      rows.forEach((groupEntry) => {
+        rowMarkup += `
           <tr>
-            <td rowspan="3">${groupEntry.group}</td>
-            <td class="text-start">1. ${groupEntry.shops[0].shop_name}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[0].week_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[0].month_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[0].year_amount)}</td>
+            <td rowspan="3" style="vertical-align: middle; border: 1px solid #000; text-align: center;">${groupEntry.group}</td>
+            <td class="text-start" style="border: 1px solid #000; padding-left: 10px;">1. ${groupEntry.shops[0].shop_name}</td>
+            <td class="text-end" style="border: 1px solid #000; padding-right: 10px;">${formatCurrency(groupEntry.shops[0].month_amount)}</td>
           </tr>
           <tr>
-            <td class="text-start">2. ${groupEntry.shops[1].shop_name}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[1].week_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[1].month_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[1].year_amount)}</td>
+            <td class="text-start" style="border: 1px solid #000; padding-left: 10px;">2. ${groupEntry.shops[1].shop_name}</td>
+            <td class="text-end" style="border: 1px solid #000; padding-right: 10px;">${formatCurrency(groupEntry.shops[1].month_amount)}</td>
           </tr>
-          <tr class="${isPageBreak ? "page-break" : ""}">
-            <td class="text-start">3. ${groupEntry.shops[2].shop_name}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[2].week_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[2].month_amount)}</td>
-            <td class="text-end">${formatCurrency(groupEntry.shops[2].year_amount)}</td>
+          <tr>
+            <td class="text-start" style="border: 1px solid #000; padding-left: 10px;">3. ${groupEntry.shops[2].shop_name}</td>
+            <td class="text-end" style="border: 1px solid #000; padding-right: 10px;">${formatCurrency(groupEntry.shops[2].month_amount)}</td>
           </tr>
         `;
-      })
-      .join("");
+      });
+    }
 
-    popup.document.write(`
+    iframeDoc.open();
+    iframeDoc.write(`
       <html>
         <head>
           <title>พิมพ์รายงาน ร้านค้ายอดนิยม 3 อันดับ</title>
           <meta charset="utf-8" />
           <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+          <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js" defer></script>
           <style>
+            @page {
+              size: portrait;
+              margin: 1.5cm;
+              @top-right {
+                content: "หน้าที่ " counter(page) " / " counter(pages);
+                font-family: 'Sarabun', sans-serif;
+                font-size: 11px;
+                font-weight: normal;
+              }
+            }
+            @page {
+              margin-top: 1.5cm;
+              margin-bottom: 1.5cm;
+            }
             body {
               font-family: 'Sarabun', sans-serif;
-              margin: 40px;
-              color: #333;
+              color: #000;
+              font-size: 14px;
+              margin: 0;
+              padding: 0;
             }
-            .header {
+            .report-container {
+              width: 100%;
+              position: relative;
+              /* เผื่อพื้นที่ด้านล่างสำหรับลายเซ็นต์ */
+              padding-bottom: 4cm;
+            }
+            .report-header {
               text-align: center;
               margin-bottom: 30px;
+              position: relative;
             }
-            .header h1 {
-              font-size: 24px;
-              margin: 0 0 10px;
-              color: #000;
+            .report-header h1 {
+              font-size: 22px;
+              margin: 0 0 5px;
+              font-weight: bold;
             }
-            .header p {
-              font-size: 16px;
-              margin: 0;
-              color: #555;
+            .report-header h3 {
+              font-size: 18px;
+              margin: 0 0 5px;
+              font-weight: bold;
+            }
+            .company-info {
+              display: flex;
+              justify-content: space-between;
+              align-items: end;
+              margin-bottom: 10px;
+              font-size: 12px;
             }
             table {
               width: 100%;
               border-collapse: collapse;
-              margin-top: 20px;
-            }
-            th, td {
-              border: 1px solid #ddd;
-              text-align: center;
-              padding: 12px;
               font-size: 14px;
+              border: 1px solid #000;
             }
             th {
-              background-color: #f4f4f4;
-              color: #333;
-              font-weight: 600;
+              border: 1px solid #000;
+              padding: 10px 5px;
+              font-weight: bold;
+              text-align: center;
             }
-            @media print {
-              body {
-                margin: 0;
-                padding: 20px;
-              }
-              @page {
-                margin: 1cm;
-              }
-              .page-break {
-                page-break-after: always;
-                break-after: page;
-              }
+            td {
+              padding: 8px 5px;
             }
-            .text-start {
-              text-align: start;
+            tr {
+              break-inside: avoid;
             }
-            .text-end {
-              text-align: end;
+            .text-start { text-align: left; }
+            .text-center { text-align: center; }
+            .text-end { text-align: right; }
+            .footer-signature {
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              width: 250px;
+            }
+            .signature-name {
+              width: 250px;
+              text-align: center;
+              margin-top: 5px;
+            }
+            .pagedjs_margin-top-right > .pagedjs_margin-content {
+              text-align: right;
             }
           </style>
+          <script>
+            window.PagedConfig = {
+              auto: true,
+              after: (flow) => {
+                setTimeout(() => {
+                  window.print();
+                  window.onafterprint = function() {
+                    if (window.frameElement) {
+                      window.frameElement.parentNode.removeChild(window.frameElement);
+                    }
+                  };
+                }, 800);
+              }
+            };
+          </script>
         </head>
         <body>
-          <div class="header">
-            <h1>รายงานยอดขาย</h1>
-            <h3>ร้านค้ายอดนิยม 3 อันดับ</h3>
-            <p>${subHeaderText}</p>
+          <div class="report-container">
+            <div class="report-header">
+              <h1>รายงานยอดขาย</h1>
+              <h3>ร้านค้ายอดนิยม 3 อันดับ</h3>
+              <div class="period-text">${periodText}</div>
+            </div>
+            
+            <div class="company-info">
+              <div style="text-align: left;">
+                <p>กาดนั้งก้อม หนองกระทิง</p>
+                <p>ตำบล บ่อแฮ้ว อำเภอ เมืองลำปาง จังหวัด ลำปาง 52100</p>
+              </div>
+              <div style="text-align: right;">
+                <p>วันที่พิมพ์: ${printDate}</p>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 20%;">กลุ่มสังกัด</th>
+                  <th style="width: 50%;">ชื่อร้านค้า</th>
+                  <th style="width: 30%;">ยอดขายรายเดือน</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowMarkup}
+              </tbody>
+            </table>
+
+            <div class="footer-signature">
+              <div>(ลงชื่อ)............................................................</div>
+              <div class="signature-name">( ${user?.fullname || "ไม่พบข้อมูล"} )</div>
+              <div style="margin-top: 5px; width: 250px; text-align: center;">ผู้จัดทำ</div>
+            </div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 20%;">กลุ่มสังกัด</th>
-                <th style="width: 20%;">ชื่อร้านค้า</th>
-                <th style="width: 20%;">รายสัปดาห์</th>
-                <th style="width: 20%;">รายเดือน</th>
-                <th style="width: 20%;">รายปี</th>
-              </tr>
-            </thead>
-            <tbody>${rowMarkup}</tbody>
-          </table>
-          <script>
-            window.onload = function() {
-              window.print();
-              window.onafterprint = function() { window.close(); };
-            }
-          </script>
         </body>
       </html>
     `);
-
-    popup.document.close();
+    iframeDoc.close();
   };
 
   const getReport3Shop = async () => {

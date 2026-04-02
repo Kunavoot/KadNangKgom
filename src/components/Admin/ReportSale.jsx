@@ -95,11 +95,11 @@ function ReportSale() {
           if (selectedReportType === "day")
             periodHeaderPrefix = "รายงานยอดขายประจำวันที่";
           else if (selectedReportType === "week")
-            periodHeaderPrefix = "รายงานยอดขายรอบวันที่";
+            periodHeaderPrefix = "รายงานยอดขายประจำสัปดาห์ที่";
           else if (selectedReportType === "month")
-            periodHeaderPrefix = "รายงานยอดขายประจำเดือน";
+            periodHeaderPrefix = "รายงานยอดขายประจำเดือนที่";
           else if (selectedReportType === "year")
-            periodHeaderPrefix = "รายงานยอดขายประจำปี";
+            periodHeaderPrefix = "รายงานยอดขายประจำปีที่";
 
           rowMarkup += `
         <tr style="font-weight: bold; text-decoration: underline;">
@@ -140,7 +140,6 @@ function ReportSale() {
               margin-top: 1.5cm;
               margin-bottom: 1.5cm;
             }
-
             body {
               font-family: 'Sarabun', sans-serif;
               color: #000;
@@ -197,9 +196,7 @@ function ReportSale() {
             .text-start { text-align: left; }
             .text-center { text-align: center; }
             .text-end { text-align: right; }
-            
             .footer-signature {
-              /* ใช้ Absolute เพื่อตรึงไว้ที่ขวาล่างของหน้านั้นๆ */
               position: absolute;
               bottom: 0;
               right: 0;
@@ -213,7 +210,6 @@ function ReportSale() {
               text-align: center;
               margin-top: 5px;
             }
-
             .pagedjs_margin-top-right > .pagedjs_margin-content {
               text-align: right;
             }
@@ -224,8 +220,6 @@ function ReportSale() {
               after: (flow) => {
                 setTimeout(() => {
                   window.print();
-                  
-                  // Cleanup iframe after printing
                   window.onafterprint = function() {
                     if (window.frameElement) {
                       window.frameElement.parentNode.removeChild(window.frameElement);
@@ -446,7 +440,15 @@ function ReportSale() {
                   <Fragment key={pIndex}>
                     <tr className="bg-gray-100 font-bold border-b-2 border-gray-300">
                       <td colSpan="2" className="text-left py-2">
-                        รอบ/วันที่:{" "}
+                        {selectedReportType === "day"
+                          ? "ประจำวันที่ "
+                          : selectedReportType === "week"
+                            ? "ประจำสัปดาห์ที่ "
+                            : selectedReportType === "month"
+                              ? "ประจำเดือนที่ "
+                              : selectedReportType === "year"
+                                ? "ประจำปีที่ "
+                                : ""}
                         {formatReportPeriod(
                           periodData.period,
                           selectedReportType,

@@ -60,10 +60,14 @@ select {
   background: #f3f4f6;
 }
 
-.buddhist-datepicker .react-datepicker__day--selected,
-.buddhist-datepicker .react-datepicker__day--keyboard-selected {
+.buddhist-datepicker .react-datepicker__day--selected {
   background: #8b8b8b;
   color: #ffffff;
+}
+
+.buddhist-datepicker .react-datepicker__day--keyboard-selected {
+  background: #f3f4f6;
+  color: #1f2937;
 }
 
 .buddhist-datepicker .react-datepicker__day--today {
