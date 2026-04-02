@@ -34,6 +34,11 @@ export const toThaiDisplayDate = (dateValue) => {
   return dayjs(dateValue).format("DD/MM/BBBB");
 };
 
+export const toThaiDisplayDateTime = (dateValue) => {
+  if (!dateValue) return "-";
+  return dayjs(dateValue).format("DD/MM/BBBB HH:mm น.");
+};
+
 const DateInput = forwardRef(({ value, onClick, placeholder, disabled, className }, ref) => {
   const baseClasses = "flex h-10 w-full items-center justify-between rounded-sm border px-4 text-left text-sm transition focus:outline-none";
   const defaultFocus = className ? "" : "focus:ring-2 focus:ring-gray-200";

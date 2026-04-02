@@ -1,7 +1,13 @@
 import { useMemo, useState, useEffect, Fragment } from "react";
 import Loading from "../Loading";
 import axios from "axios";
-import { formatCurrency, formatReportPeriod, BuddhistDatePicker, toThaiDisplayDate } from "../../utils/utils";
+import {
+  formatCurrency,
+  formatReportPeriod,
+  BuddhistDatePicker,
+  toThaiDisplayDate,
+  toThaiDisplayDateTime,
+} from "../../utils/utils";
 import { useAuth } from "../../service/AuthContext";
 
 const reportTypes = [
@@ -22,8 +28,12 @@ function ReportSale() {
   const [activeType, setActiveType] = useState("data_group");
   const [selectedReportType, setSelectedReportType] = useState("day");
   const [selectedSellDay, setSelectedSellDay] = useState("3");
-  const [selectedStartDate, setSelectedStartDate] = useState(new Date().toISOString().split("T")[0]);
-  const [selectedEndDate, setSelectedEndDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedStartDate, setSelectedStartDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [selectedEndDate, setSelectedEndDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
 
   // ข้อมูล
   const [reportSale, setReportSale] = useState([]);
@@ -39,65 +49,110 @@ function ReportSale() {
   }, [reportSale, activeType]);
 
   const handlePrint = () => {
-    const popup = window.open("", "_blank", "width=1024,height=768");
-    if (!popup) {
-      window.print();
-      return;
+    let iframe = document.getElementById("print-iframe");
+    if (!iframe) {
+      iframe = document.createElement("iframe");
+      iframe.id = "print-iframe";
+      iframe.style.position = "absolute";
+      iframe.style.top = "-10000px";
+      iframe.style.left = "-10000px";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
     }
 
-    const printDate = toThaiDisplayDate(new Date().toISOString());
-    const reportTypeText = 
-      selectedReportType === "day" ? "รายวัน" :
-      selectedReportType === "week" ? "รายสัปดาห์" :
-      selectedReportType === "month" ? "รายเดือน" :
-      selectedReportType === "year" ? "รายปี" : "";
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-    const dayLabel = days.find(d => d.key === selectedSellDay)?.label || "";
+    // ข้อมูลสำหรับรายงาน
+    const printDate = toThaiDisplayDateTime(new Date().toISOString());
+    const reportTypeText =
+      selectedReportType === "day"
+        ? "รายวัน"
+        : selectedReportType === "week"
+          ? "รายสัปดาห์"
+          : selectedReportType === "month"
+            ? "รายเดือน"
+            : selectedReportType === "year"
+              ? "รายปี"
+              : "";
+
+    const dayLabel = days.find((d) => d.key === selectedSellDay)?.label || "";
     const periodText = `ประจำวันที่ ${toThaiDisplayDate(selectedStartDate)} ถึง ${toThaiDisplayDate(selectedEndDate)} (${dayLabel})`;
 
     let rowMarkup = "";
-    reportSale.forEach((periodData) => {
-      const formattedDate = formatReportPeriod(periodData.period, selectedReportType);
-      
-      // สร้างหัวข้อแถวแรกของ period
-      let periodHeaderPrefix = "รายงานยอดขาย";
-      if (selectedReportType === "day") periodHeaderPrefix = "รายงานยอดขายประจำวันที่";
-      else if (selectedReportType === "week") periodHeaderPrefix = "รายงานยอดขายรอบวันที่";
-      else if (selectedReportType === "month") periodHeaderPrefix = "รายงานยอดขายประจำเดือน";
-      else if (selectedReportType === "year") periodHeaderPrefix = "รายงานยอดขายประจำปี";
+    reportSale.length === 0
+      ? (rowMarkup =
+          "<tr><td colspan='2' class='text-center'>ไม่พบข้อมูล</td></tr>")
+      : reportSale.forEach((periodData) => {
+          const formattedDate = formatReportPeriod(
+            periodData.period,
+            selectedReportType,
+          );
 
-      rowMarkup += `
+          // สร้างหัวข้อแถวแรกของ period
+          let periodHeaderPrefix = "รายงานยอดขาย";
+          if (selectedReportType === "day")
+            periodHeaderPrefix = "รายงานยอดขายประจำวันที่";
+          else if (selectedReportType === "week")
+            periodHeaderPrefix = "รายงานยอดขายรอบวันที่";
+          else if (selectedReportType === "month")
+            periodHeaderPrefix = "รายงานยอดขายประจำเดือน";
+          else if (selectedReportType === "year")
+            periodHeaderPrefix = "รายงานยอดขายประจำปี";
+
+          rowMarkup += `
         <tr style="font-weight: bold; text-decoration: underline;">
           <td colspan="2" class="text-start">${periodHeaderPrefix} ${formattedDate}</td>
         </tr>
       `;
 
-      periodData[activeType].forEach((item) => {
-        rowMarkup += `
+          periodData[activeType].forEach((item) => {
+            rowMarkup += `
           <tr>
             <td class="text-start" style="padding-left: 20px;">${item.name}</td>
             <td class="text-end">${formatCurrency(item.amount)}</td>
           </tr>
         `;
-      });
-    });
+          });
+        });
 
-    popup.document.write(`
+    iframeDoc.open();
+    iframeDoc.write(`
       <html>
         <head>
           <title>พิมพ์รายงานยอดขาย</title>
           <meta charset="utf-8" />
           <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+          <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js" defer></script>
           <style>
             @page {
               size: portrait;
               margin: 1.5cm;
+              @top-right {
+                content: "หน้าที่ " counter(page) " / " counter(pages);
+                font-family: 'Sarabun', sans-serif;
+                font-size: 11px;
+                font-weight: normal;
+              }
             }
+            @page {
+              margin-top: 1.5cm;
+              margin-bottom: 1.5cm;
+            }
+
             body {
               font-family: 'Sarabun', sans-serif;
-              margin: 20px;
               color: #000;
               font-size: 14px;
+              margin: 0;
+              padding: 0;
+            }
+            .report-container {
+              width: 100%;
+              position: relative;
+              /* เผื่อพื้นที่ด้านล่างสำหรับลายเซ็นต์ */
+              padding-bottom: 4cm;
             }
             .report-header {
               text-align: center;
@@ -113,7 +168,7 @@ function ReportSale() {
               display: flex;
               justify-content: space-between;
               align-items: end;
-              margin-bottom: 0px;
+              margin-bottom: 10px;
               font-size: 12px;
             }
             table {
@@ -131,22 +186,27 @@ function ReportSale() {
             td {
               padding: 8px 5px;
             }
+            tr {
+              break-inside: avoid;
+            }
+            tfoot {
+              border-top: 1px solid #000;
+              border-bottom: 1px solid #000;
+              font-weight: bold;
+            }
             .text-start { text-align: left; }
             .text-center { text-align: center; }
             .text-end { text-align: right; }
             
             .footer-signature {
-              margin-top: 60px;
+              /* ใช้ Absolute เพื่อตรึงไว้ที่ขวาล่างของหน้านั้นๆ */
+              position: absolute;
+              bottom: 0;
+              right: 0;
               display: flex;
               flex-direction: column;
-              align-items: flex-end;
-              padding-right: 40px;
-            }
-            .signature-line {
-              margin-top: 40px;
-              border-bottom: 1px dotted #000;
+              align-items: center;
               width: 250px;
-              text-align: center;
             }
             .signature-name {
               width: 250px;
@@ -154,65 +214,73 @@ function ReportSale() {
               margin-top: 5px;
             }
 
-            @media print {
-              .no-print { display: none; }
-              tr { page-break-inside: avoid; }
+            .pagedjs_margin-top-right > .pagedjs_margin-content {
+              text-align: right;
             }
           </style>
+          <script>
+            window.PagedConfig = {
+              auto: true,
+              after: (flow) => {
+                setTimeout(() => {
+                  window.print();
+                  
+                  // Cleanup iframe after printing
+                  window.onafterprint = function() {
+                    if (window.frameElement) {
+                      window.frameElement.parentNode.removeChild(window.frameElement);
+                    }
+                  };
+                }, 800);
+              }
+            };
+          </script>
         </head>
         <body>
-          <div class="report-header">
-            <div class="print-date"></div>
-            <h1>รายงานยอดขาย${reportTypeText}</h1>
-            <div class="period-text">${periodText}</div>
-          </div>
-          
-          <div class="company-info">
-            <div style="text-align: left;">
-              <p>กาดนั้งก้อม หนองกระทิง</p>
-              <p>ตำบล บ่อแฮ้ว อำเภอ เมืองลำปาง จังหวัด ลำปาง 52100</p>
+          <div class="report-container">
+            <div class="report-header">
+              <h1>รายงานยอดขาย${reportTypeText}</h1>
+              <div class="period-text">${periodText}</div>
             </div>
-            <div style="text-align: right;">
-              <p>หน้าที่ 1/1</p>
-              <p>วันที่พิมพ์: ${printDate}</p>
+            
+            <div class="company-info">
+              <div style="text-align: left;">
+                <p>กาดนั้งก้อม หนองกระทิง</p>
+                <p>ตำบล บ่อแฮ้ว อำเภอ เมืองลำปาง จังหวัด ลำปาง 52100</p>
+              </div>
+              <div style="text-align: right;">
+                <p>วันที่พิมพ์: ${printDate}</p>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 70%; text-align: left;">${activeLabelText}</th>
+                  <th style="width: 30%; text-align: right;">ยอดขาย</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowMarkup}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td class="text-left">รวมทั้งสิ้น</td>
+                  <td class="text-end">${formatCurrency(totals)}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div class="footer-signature">
+              <div>(ลงชื่อ)............................................................</div>
+              <div class="signature-name">( ${user?.fullname || "ไม่พบข้อมูล"} )</div>
+              <div style="margin-top: 5px; width: 250px; text-align: center;">ผู้จัดทำ</div>
             </div>
           </div>
-
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 70%; text-align: left;">${activeLabelText}</th>
-                <th style="width: 30%; text-align: right;">ยอดขาย</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowMarkup}
-            </tbody>
-            <tfoot>
-              <tr style="border-top: 2px solid #000; border-bottom: 2px solid #000; font-weight: bold;">
-                <td class="text-center">รวมทั้งสิ้น</td>
-                <td class="text-end">${formatCurrency(totals)}</td>
-              </tr>
-            </tfoot>
-          </table>
-
-          <div class="footer-signature">
-            <div>(ลงชื่อ)............................................................</div>
-            <div class="signature-name">( ${user?.name || user?.username || "เจ้าหน้าที่"} )</div>
-            <div style="margin-top: 5px; width: 250px; text-align: center;">ผู้จัดทำ</div>
-          </div>
-
-          <script>
-            window.onload = function() {
-              window.print();
-              window.onafterprint = function() { window.close(); };
-            }
-          </script>
         </body>
       </html>
     `);
-
-    popup.document.close();
+    iframeDoc.close();
   };
 
   const getReportSale = async () => {
@@ -367,23 +435,38 @@ function ReportSale() {
               </tr>
             </thead>
             <tbody className="border-none">
-              {reportSale.map((periodData, pIndex) => (
-                <Fragment key={pIndex}>
-                  <tr className="bg-gray-100 font-bold border-b-2 border-gray-300">
-                    <td colSpan="2" className="text-left py-2">
-                       รอบ/วันที่: {formatReportPeriod(periodData.period, selectedReportType)}
-                        </td>
-                  </tr>
-                  {periodData[activeType].map((item, iIndex) => (
-                    <tr key={`${pIndex}-${iIndex}`} className="hover:bg-gray-50 border-b border-gray-100">
-                      <td className="text-center py-2">{item.name}</td>
-                      <td className="text-end py-2 pr-10">
-                        {formatCurrency(item.amount)}
+              {reportSale.length === 0 ? (
+                <tr>
+                  <td colSpan="2" className="text-center py-2">
+                    ไม่พบข้อมูล
+                  </td>
+                </tr>
+              ) : (
+                reportSale.map((periodData, pIndex) => (
+                  <Fragment key={pIndex}>
+                    <tr className="bg-gray-100 font-bold border-b-2 border-gray-300">
+                      <td colSpan="2" className="text-left py-2">
+                        รอบ/วันที่:{" "}
+                        {formatReportPeriod(
+                          periodData.period,
+                          selectedReportType,
+                        )}
+                      </td>
+                    </tr>
+                    {periodData[activeType].map((item, iIndex) => (
+                      <tr
+                        key={`${pIndex}-${iIndex}`}
+                        className="hover:bg-gray-50 border-b border-gray-100"
+                      >
+                        <td className="text-center py-2">{item.name}</td>
+                        <td className="text-end py-2 pr-10">
+                          {formatCurrency(item.amount)}
                         </td>
                       </tr>
-                  ))}
-                </Fragment>
-              ))}
+                    ))}
+                  </Fragment>
+                ))
+              )}
             </tbody>
             <tfoot>
               <tr className="bg-[#71FF7A]">
