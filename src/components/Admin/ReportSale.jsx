@@ -9,6 +9,7 @@ import {
   toThaiDisplayDateTime,
 } from "../../utils/utils";
 import { useAuth } from "../../service/AuthContext";
+import Swal from "sweetalert2";
 
 const reportTypes = [
   { key: "data_group", text: "กลุ่มสังกัด" },
@@ -294,6 +295,13 @@ function ReportSale() {
       setReportSale(response.data.data);
     } catch (error) {
       console.error("Error fetching report sale:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsLoading(false);
     }

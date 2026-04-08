@@ -170,6 +170,13 @@ function ManageGroup() {
       setDetails(response.data.data || []);
     } catch (error) {
       console.error("Error fetching group data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setDetails([]);
     } finally {
       setIsLoading(false);

@@ -37,6 +37,13 @@ function ReportMap() {
       setMapImage(response.data.filename);
     } catch (error) {
       console.error("Error fetching map image:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
@@ -153,6 +160,13 @@ function ReportMap() {
       setReportMap(response.data.data);
     } catch (error) {
       console.error("Error fetching report map:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
@@ -274,6 +288,8 @@ function ReportMap() {
                             shop: stall.stall_shop,
                             ptype: stall.stall_ptype,
                             amgt: stall.stall_agmt,
+                            area: stall.stall_area,
+                            price: stall.stall_price,
                           })
                         }
                         className={`inline-flex h-9 min-w-[52px] cursor-pointer items-center justify-center rounded-full px-2 text-[11px] font-medium text-black ${getStallChipClass(stall.stall_status)}`}
@@ -385,6 +401,18 @@ function ReportMap() {
                 <span className="text-gray-500">ประเภทพื้นที่</span>
                 <span className="font-medium text-gray-800">
                   {selectedStall.zone}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-gray-100 pb-2">
+                <span className="text-gray-500">ขนาด</span>
+                <span className="font-medium text-gray-800">
+                  {selectedStall.area ? `${selectedStall.area} ตร.ม.` : "-"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-gray-100 pb-2">
+                <span className="text-gray-500">ค่าเช่า/วัน</span>
+                <span className="font-medium text-gray-800">
+                  {selectedStall.price ? `${Number(selectedStall.price).toLocaleString()} บาท` : "-"}
                 </span>
               </div>
               <div

@@ -62,7 +62,7 @@ function ManageMarket() {
       group_id: selectedGroupId,
       market_area: "4 x 4",
       market_price: "50",
-      market_addr: "",
+      market_addr: "-",
       market_img: "",
       market_status: "0",
     });
@@ -239,6 +239,13 @@ function ManageMarket() {
       setGroups(response.data.data || []);
     } catch (error) {
       console.error("Error fetching market summary:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setGroups([]);
     } finally {
       setIsLoading(false);
@@ -257,6 +264,13 @@ function ManageMarket() {
       setStalls(response.data.data || []);
     } catch (error) {
       console.error("Error fetching market detail:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setStalls([]);
     } finally {
       setIsLoading(false);
@@ -427,7 +441,7 @@ function ManageMarket() {
               {formType === "edit" ? "แก้ไขล็อคตลาด" : "เพิ่มล็อคตลาด"}
             </div>
             <button
-              className="text-4xl font-bold text-gray-500 hover:text-gray-700"
+              className="text-4xl font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
               onClick={handleBackToDetail}
             >
               ×

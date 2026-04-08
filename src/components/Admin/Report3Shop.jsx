@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
 import Loading from "../Loading";
 import axios from "axios";
-import { formatCurrency, BuddhistDatePicker, toThaiDisplayDate, toThaiDisplayDateTime } from "../../utils/utils";
+import { formatCurrency, toThaiDisplayDateTime } from "../../utils/utils";
 import { useAuth } from "../../service/AuthContext";
+import Swal from "sweetalert2";
 
 function Report3Shop() {
   const { user } = useAuth();
@@ -259,6 +260,13 @@ function Report3Shop() {
       );
       setReportSale(response.data.data);
     } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response.data.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       console.error("Error fetching report sale:", error);
     } finally {
       setIsLoading(false);
@@ -359,7 +367,13 @@ function Report3Shop() {
                 <th className="w-[20%] text-center">รายเดือน</th>
               </tr>
             </thead>
-            {rows.map((groupEntry) => (
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan="3" className="text-center py-4">
+                  ไม่พบข้อมูล
+                </td>
+              </tr>
+            ) : rows.map((groupEntry) => (
               <tbody key={groupEntry.group} className="group border-none">
                 <tr className="border-b border-gray-100 group-hover:bg-gray-100">
                   <td

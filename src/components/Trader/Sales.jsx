@@ -54,6 +54,13 @@ function Sales() {
     } catch (error) {
       setIsLoading(false);
       console.error("Error fetching sales history:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
   

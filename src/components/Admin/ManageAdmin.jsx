@@ -147,6 +147,26 @@ function ManageAdmin() {
       setIsLoading(false);
       return false;
     }
+    if (formData.admin_un.length < 6 || formData.admin_pw.length < 6) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่ต่ำกว่า 6 ตัวอักษร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.admin_un.length > 20 || formData.admin_pw.length > 20) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
     if (
       !formData.admin_tel.match(/^[0-9]+$/) ||
       formData.admin_tel.length !== 10
@@ -259,6 +279,13 @@ function ManageAdmin() {
       setDetails(response.data.data || []);
     } catch (error) {
       console.error("Error fetching admin data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setDetails([]);
     } finally {
       setIsLoading(false);
@@ -273,6 +300,13 @@ function ManageAdmin() {
       setPrefix(response.data.data || []);
     } catch (error) {
       console.error("Error fetching prefix data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setPrefix([]);
     }
   };
@@ -579,6 +613,7 @@ function ManageAdmin() {
                   onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกชื่อผู้ใช้"
                   disabled={formType === "edit"}
+                  maxLength={20}
                 />
               </div>
               <div>
@@ -593,6 +628,7 @@ function ManageAdmin() {
                     value={formData.admin_pw || ""}
                     onChange={(e) => handleFormChange(e)}
                     placeholder="กรอกรหัสผ่าน"
+                    maxLength={20}
                   />
                   <button
                     type="button"

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Swal from "sweetalert2";
 
 const dayFilters = [
   { key: "1", label: "วันเสาร์" },
@@ -37,6 +38,13 @@ function Map() {
       setMapImage(response.data.filename);
     } catch (error) {
       console.error("Error fetching map image:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
@@ -54,6 +62,13 @@ function Map() {
       setReportMap(response.data.data);
     } catch (error) {
       console.error("Error fetching report map:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สมารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
 
@@ -182,16 +197,16 @@ function Map() {
               </div>
 
               <div className="space-y-3">
-                {reportMap.map((group) => (
+                {reportMap.map((item) => (
                   <div
-                    key={group.group}
+                    key={item.group.group_name}
                     className="rounded bg-gray-100 p-2.5 min-h-[180px]"
                   >
-                    <div className="mb-2 rounded bg-[#65ef6e] px-3 py-1.5 text-2xl font-semibold">
-                      กลุ่มสังกัด : {group.group}
+                    <div className="mb-2 rounded bg-[#65ef6e] px-3 py-1.5 text-lg font-semibold">
+                      {item.group.group_name} ({item.group.group_zone})
                     </div>
                     <div className="flex flex-wrap gap-2 pb-1">
-                      {group.stall.map((stall) => {
+                      {item.stall.map((stall) => {
                         return (
                           <span
                             key={stall.stall_id}

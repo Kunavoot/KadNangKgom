@@ -71,7 +71,7 @@ function ManageTrader() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e, type) => {
@@ -205,7 +205,11 @@ function ManageTrader() {
     } // ลบช่องว่างหน้าหลัง
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const item in formData) {
-      if (item === "trader_no" || item === "trader_pic_trader" || item === "trader_pic_product") {
+      if (
+        item === "trader_no" ||
+        item === "trader_pic_trader" ||
+        item === "trader_pic_product"
+      ) {
         continue;
       }
       if (!formData[item]) {
@@ -264,10 +268,10 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (formData.trader_birth > formData.trader_date) {
+    if (formData.trader_business > formData.trader_date) {
       Swal.fire({
         icon: "error",
-        title: "วันเกิดต้องน้อยกว่าวันเข้ารับตำแหน่ง",
+        title: "วันเริ่มทำธุรกิจต้องไม่เกินวันที่สมัคร",
         confirmButtonText: "ตกลง",
         confirmButtonColor: "#5bc06d",
       });
@@ -294,6 +298,26 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
+    if (formData.trader_un.length < 6 || formData.trader_pw.length < 6) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่ต่ำกว่า 6 ตัวอักษร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.trader_un.length > 20 || formData.trader_pw.length > 20) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
     return true;
   };
 
@@ -307,6 +331,13 @@ function ManageTrader() {
       setDetails(response.data.data || []);
     } catch (error) {
       console.error("Error fetching trader data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setDetails([]);
     } finally {
       setIsLoading(false);
@@ -323,6 +354,13 @@ function ManageTrader() {
       setTypeMembers(response.data.data || []);
     } catch (error) {
       console.error("Error fetching type members:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setTypeMembers([]);
     } finally {
       setIsLoading(false);
@@ -339,6 +377,13 @@ function ManageTrader() {
       setTypeProducts(response.data.data || []);
     } catch (error) {
       console.error("Error fetching type products:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setTypeProducts([]);
     } finally {
       setIsLoading(false);
@@ -355,6 +400,13 @@ function ManageTrader() {
       setPrefix(response.data.data || []);
     } catch (error) {
       console.error("Error fetching prefix:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setPrefix([]);
     } finally {
       setIsLoading(false);
@@ -438,7 +490,7 @@ function ManageTrader() {
         trader_pic_product: "",
         trader_un: "",
         trader_pw: "",
-        trader_date: "",
+        trader_date: new Date().toISOString().split("T")[0],
         trader_status: "1",
       });
     }
@@ -649,6 +701,7 @@ function ManageTrader() {
                       value={formData.trader_tel}
                       onChange={handleFormChange}
                       placeholder="กรอกเบอร์โทรศัพท์"
+                      maxLength={10}
                     />
                   </div>
                   <div>
@@ -829,6 +882,7 @@ function ManageTrader() {
                       onChange={handleFormChange}
                       placeholder="กรอกชื่อผู้ใช้"
                       disabled={formType === "edit"}
+                      maxLength={20}
                     />
                   </div>
                   <div>
@@ -842,6 +896,7 @@ function ManageTrader() {
                       value={formData.trader_pw}
                       onChange={handleFormChange}
                       placeholder="กรอกรหัสผ่าน"
+                      maxLength={20}
                     />
                   </div>
                   <div>

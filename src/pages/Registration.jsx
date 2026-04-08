@@ -59,7 +59,7 @@ function Registration() {
         formData[item] = formData[item].trim();
       }
     } // ลบช่องว่างหน้าหลัง
-
+    // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
     for (const key in formData) {
       if (key === "trader_car" && formData.trader_has_car == 0) {
         continue;
@@ -73,6 +73,100 @@ function Registration() {
         });
         return false;
       }
+    }
+    // เช็คเงื่อนไขบาง Form
+    if (!formData.trader_shop) {
+      Swal.fire({
+        icon: "error",
+        title: "กรุณากรอกชื่อร้านค้า",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_name.match(/^[ก-๙]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ค้าต้องเป็นภาษาไทยเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_sname.match(/^[ก-๙]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "นามสกุลผู้ค้าต้องเป็นภาษาไทยเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (
+      !formData.trader_tel.match(/^[0-9]+$/) ||
+      formData.trader_tel.length !== 10
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้นและมีความยาว 10 หลัก",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.trader_business > new Date().toISOString()) {
+      Swal.fire({
+        icon: "error",
+        title: "วันเริ่มทำธุรกิจต้องไม่เกินวันที่สมัคร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_un.match(/^[a-zA-Z0-9]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (!formData.trader_pw.match(/^[a-zA-Z0-9]+$/)) {
+      Swal.fire({
+        icon: "error",
+        title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.trader_un.length < 6 || formData.trader_pw.length < 6) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่ต่ำกว่า 6 ตัวอักษร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
+    }
+    if (formData.trader_un.length > 20 || formData.trader_pw.length > 20) {
+      Swal.fire({
+        icon: "error",
+        title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      setIsLoading(false);
+      return false;
     }
     return true;
   };
@@ -113,6 +207,13 @@ function Registration() {
       setPrefix(response.data.data || []);
     } catch (error) {
       console.error("Error fetching prefix data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setPrefix([]);
     }
   };
@@ -125,6 +226,13 @@ function Registration() {
       setProductType(response.data.data || []);
     } catch (error) {
       console.error("Error fetching product type data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setProductType([]);
     }
   };
@@ -152,7 +260,9 @@ function Registration() {
               <fieldset className="fieldset w-[80%] m-auto">
                 <div className="flex flex-row gap-3">
                   <div className="w-[60%]">
-                    <label className="label mb-1" htmlFor="trader_pname">คำนำหน้า</label>
+                    <label className="label mb-1" htmlFor="trader_pname">
+                      คำนำหน้า
+                    </label>
                     <select
                       className="select px-3 w-full focus:outline-none focus:border-[#5bc06d]"
                       placeholder="คำนำหน้า"
@@ -161,7 +271,9 @@ function Registration() {
                       value={formData.trader_pname}
                       onChange={handleChange}
                     >
-                      <option value="" disabled>เลือกคำนำหน้า</option>
+                      <option value="" disabled>
+                        เลือกคำนำหน้า
+                      </option>
                       {prefix.map((item) => (
                         <option key={item.id} value={item.title_th}>
                           {item.title_th}
@@ -170,7 +282,9 @@ function Registration() {
                     </select>
                   </div>
                   <div className="w-full">
-                    <label className="label mb-1" htmlFor="trader_name">ชื่อ</label>
+                    <label className="label mb-1" htmlFor="trader_name">
+                      ชื่อ
+                    </label>
                     <input
                       type="text"
                       className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -183,7 +297,9 @@ function Registration() {
                   </div>
                 </div>
 
-                <label className="label" htmlFor="trader_sname">นามสกุล</label>
+                <label className="label" htmlFor="trader_sname">
+                  นามสกุล
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -194,7 +310,9 @@ function Registration() {
                   onChange={handleChange}
                 />
 
-                <label className="label" htmlFor="trader_tel">เบอร์โทรศัพท์</label>
+                <label className="label" htmlFor="trader_tel">
+                  เบอร์โทรศัพท์
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -207,7 +325,9 @@ function Registration() {
 
                 <div className="flex flex-row gap-3">
                   <div className="w-[50%]">
-                    <label className="label mb-1" htmlFor="trader_shop">ชื่อร้านค้า</label>
+                    <label className="label mb-1" htmlFor="trader_shop">
+                      ชื่อร้านค้า
+                    </label>
                     <input
                       type="text"
                       className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -219,7 +339,9 @@ function Registration() {
                     />
                   </div>
                   <div className="w-[50%]">
-                    <label className="label mb-1" htmlFor="trader_ptype">ประเภทสินค้า</label>
+                    <label className="label mb-1" htmlFor="trader_ptype">
+                      ประเภทสินค้า
+                    </label>
                     <select
                       className="select px-3 w-full focus:outline-none focus:border-[#5bc06d]"
                       id="trader_ptype"
@@ -227,7 +349,9 @@ function Registration() {
                       value={formData.trader_ptype}
                       onChange={handleChange}
                     >
-                      <option value="" disabled>เลือกประเภทสินค้า</option>
+                      <option value="" disabled>
+                        เลือกประเภทสินค้า
+                      </option>
                       {productType.map((item) => (
                         <option key={item.ptype_id} value={item.ptype_id}>
                           {item.ptype_name}
@@ -237,7 +361,9 @@ function Registration() {
                   </div>
                 </div>
 
-                <label className="label" htmlFor="trader_product">สินค้าที่ขาย</label>
+                <label className="label" htmlFor="trader_product">
+                  สินค้าที่ขาย
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -248,7 +374,9 @@ function Registration() {
                   onChange={handleChange}
                 />
 
-                <label className="label" htmlFor="trader_addr_product">แหล่งที่มาของสินค้า</label>
+                <label className="label" htmlFor="trader_addr_product">
+                  แหล่งที่มาของสินค้า
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -259,7 +387,9 @@ function Registration() {
                   onChange={handleChange}
                 />
 
-                <label className="label" htmlFor="trader_addr">ที่อยู่ผู้ค้า</label>
+                <label className="label" htmlFor="trader_addr">
+                  ที่อยู่ผู้ค้า
+                </label>
                 <textarea
                   className="textarea h-28.5 px-3 w-full focus:outline-none focus:border-[#5bc06d] resize-none"
                   placeholder="ที่อยู่ผู้ค้า"
@@ -289,7 +419,9 @@ function Registration() {
                   />
                 </div>
 
-                <label className="label" htmlFor="trader_fsale">สถานที่เคยขาย</label>
+                <label className="label" htmlFor="trader_fsale">
+                  สถานที่เคยขาย
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -339,7 +471,9 @@ function Registration() {
                   </div>
                 </div>
 
-                <label className="label" htmlFor="trader_car">รถที่ใช้</label>
+                <label className="label" htmlFor="trader_car">
+                  รถที่ใช้
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -351,7 +485,9 @@ function Registration() {
                   disabled={formData.trader_has_car == 0}
                 />
 
-                <label className="label" htmlFor="trader_facebook">Facebook</label>
+                <label className="label" htmlFor="trader_facebook">
+                  Facebook
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -362,7 +498,9 @@ function Registration() {
                   onChange={handleChange}
                 />
 
-                <label className="label" htmlFor="trader_line">Line</label>
+                <label className="label" htmlFor="trader_line">
+                  Line
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -373,7 +511,9 @@ function Registration() {
                   onChange={handleChange}
                 />
 
-                <label className="label" htmlFor="trader_un">Username</label>
+                <label className="label" htmlFor="trader_un">
+                  Username
+                </label>
                 <input
                   type="text"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -384,7 +524,9 @@ function Registration() {
                   onChange={handleChange}
                 />
 
-                <label className="label" htmlFor="trader_pw">Password</label>
+                <label className="label" htmlFor="trader_pw">
+                  Password
+                </label>
                 <input
                   type="password"
                   className="input px-3 w-full focus:outline-none focus:border-[#5bc06d]"
@@ -398,7 +540,10 @@ function Registration() {
             </div>
           </div>
           <div className="flex justify-end pr-8">
-            <button className="btn w-[42.5%] align-right mt-7 pr-5 bg-[#72DF82] hover:bg-[#5bc06d]" onClick={handleSubmit}>
+            <button
+              className="btn w-[42.5%] align-right mt-7 pr-5 bg-[#72DF82] hover:bg-[#5bc06d]"
+              onClick={handleSubmit}
+            >
               ดำเนินการต่อ
             </button>
           </div>

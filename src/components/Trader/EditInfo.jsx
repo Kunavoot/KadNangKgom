@@ -171,6 +171,13 @@ function EditInfo() {
       setOriginalTraderImage(traderImageUrl);
     } catch (error) {
       console.error("Error fetching profile:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -184,6 +191,13 @@ function EditInfo() {
       setPrefixOptions(response.data.data || []);
     } catch (error) {
       console.error("Error fetching prefix:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       setPrefixOptions([]);
     }
   };

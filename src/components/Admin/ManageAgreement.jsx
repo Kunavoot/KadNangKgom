@@ -40,9 +40,9 @@ function ManageAgreement() {
     agmt_end: "",
   });
   const [groupFilter, setGroupFilter] = useState({
-    status: "",
-    startDate: "",
-    endDate: "",
+    status: "3",
+    startDate: dayjs().format("YYYY-MM-DD"),
+    endDate: dayjs().add(1, "month").format("YYYY-MM-DD"),
   });
 
   const selectedGroup = useMemo(
@@ -84,7 +84,7 @@ function ManageAgreement() {
     setSelectedStall(stall);
     console.log(stall);
     console.log("id", user.id);
-    
+    console.log("filter", filter);
 
     if (stall.market_rented === "1") {
       Swal.fire({
@@ -287,6 +287,13 @@ function ManageAgreement() {
       setGroups(response.data.data);
     } catch (error) {
       console.error("Error fetching group:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -307,6 +314,13 @@ function ManageAgreement() {
       setAgreement_Summary(response.data.data);
     } catch (error) {
       console.error("Error fetching agreement summary:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -329,6 +343,13 @@ function ManageAgreement() {
       setAgreement_Detail(response.data.data);
     } catch (error) {
       console.error("Error fetching agreement detail:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -351,6 +372,13 @@ function ManageAgreement() {
       setAgreement_List(response.data.data);
     } catch (error) {
       console.error("Error fetching agreement list:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     } finally {
       setIsLoading(false);
     }
