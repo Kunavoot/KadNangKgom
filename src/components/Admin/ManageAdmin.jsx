@@ -106,16 +106,20 @@ function ManageAdmin() {
   };
 
   const handleValidate = () => {
+    // สร้าง copy ของ formData เพื่อ trim และ validate (ห้าม mutate state โดยตรง)
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
+
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
-    for (const item in formData) {
+    for (const item in data) {
       if (item === "admin_no") {
         continue;
-      } else if (formData[item] === "") {
+      } else if (data[item] === "") {
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",
@@ -127,7 +131,7 @@ function ManageAdmin() {
       }
     }
     // เช็คเงื่อนไขบาง Form
-    if (!formData.admin_un.match(/^[a-zA-Z0-9]+$/)) {
+    if (!data.admin_un.match(/^[a-zA-Z0-9]+$/)) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
@@ -137,7 +141,7 @@ function ManageAdmin() {
       setIsLoading(false);
       return false;
     }
-    if (!formData.admin_pw.match(/^[a-zA-Z0-9]+$/)) {
+    if (!data.admin_pw.match(/^[a-zA-Z0-9]+$/)) {
       Swal.fire({
         icon: "error",
         title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
@@ -147,7 +151,7 @@ function ManageAdmin() {
       setIsLoading(false);
       return false;
     }
-    if (formData.admin_un.length < 6 || formData.admin_pw.length < 6) {
+    if (data.admin_un.length < 6 || data.admin_pw.length < 6) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่ต่ำกว่า 6 ตัวอักษร",
@@ -157,7 +161,7 @@ function ManageAdmin() {
       setIsLoading(false);
       return false;
     }
-    if (formData.admin_un.length > 20 || formData.admin_pw.length > 20) {
+    if (data.admin_un.length > 20 || data.admin_pw.length > 20) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร",
@@ -168,8 +172,8 @@ function ManageAdmin() {
       return false;
     }
     if (
-      !formData.admin_tel.match(/^[0-9]+$/) ||
-      formData.admin_tel.length !== 10
+      !data.admin_tel.match(/^[0-9]+$/) ||
+      data.admin_tel.length !== 10
     ) {
       Swal.fire({
         icon: "error",
@@ -181,7 +185,7 @@ function ManageAdmin() {
       return false;
     }
     const today = new Date();
-    const birthDate = new Date(formData.admin_birth);
+    const birthDate = new Date(data.admin_birth);
     const age = today.getFullYear() - birthDate.getFullYear();
     const isBeforeBirthday =
       today.getMonth() < birthDate.getMonth() ||
@@ -198,7 +202,7 @@ function ManageAdmin() {
       setIsLoading(false);
       return false;
     }
-    if (formData.admin_birth > formData.admin_date) {
+    if (data.admin_birth > data.admin_date) {
       Swal.fire({
         icon: "error",
         title: "วันเกิดต้องน้อยกว่าวันเข้ารับตำแหน่ง",

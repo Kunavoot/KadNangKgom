@@ -263,7 +263,7 @@ function Report3Shop() {
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: error.response.data.message || "ไม่สามารถดึงข้อมูลได้",
+        text: error.response?.data?.message || "ไม่สามารถดึงข้อมูลได้",
         timer: 1500,
         showConfirmButton: false,
       });

@@ -150,17 +150,19 @@ function ManageMarket() {
   };
 
   const handleValidate = () => {
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
 
     if (!selectedGroupId) return false;
     if (
-      !formData.market_area ||
-      !formData.market_price ||
-      !formData.market_addr
+      !data.market_area ||
+      !data.market_price ||
+      !data.market_addr
     ) {
       Swal.fire({
         icon: "error",

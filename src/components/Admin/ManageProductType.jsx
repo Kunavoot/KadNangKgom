@@ -81,17 +81,18 @@ function ManageProductType() {
   };
 
   const handleValidate = () => {
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
-    for (const item in formData) {
-      console.log(item);
+    for (const item in data) {
       if (item === "ptype_id") {
         continue;
-      } else if (formData[item] === "") {
+      } else if (data[item] === "") {
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",

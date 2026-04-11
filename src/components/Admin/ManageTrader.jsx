@@ -198,13 +198,15 @@ function ManageTrader() {
   };
 
   const handleValidate = () => {
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
     // เช็ค Form ก่อนว่าข้อมูลครบมั้ย
-    for (const item in formData) {
+    for (const item in data) {
       if (
         item === "trader_no" ||
         item === "trader_pic_trader" ||
@@ -212,8 +214,7 @@ function ManageTrader() {
       ) {
         continue;
       }
-      if (!formData[item]) {
-        console.log(item);
+      if (!data[item]) {
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",
@@ -225,7 +226,7 @@ function ManageTrader() {
       }
     }
     // เช็คเงื่อนไขบาง Form
-    if (!formData.trader_shop) {
+    if (!data.trader_shop) {
       Swal.fire({
         icon: "error",
         title: "กรุณากรอกชื่อร้านค้า",
@@ -235,7 +236,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (!formData.trader_name.match(/^[ก-๙]+$/)) {
+    if (!data.trader_name.match(/^[ก-๙]+$/)) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ค้าต้องเป็นภาษาไทยเท่านั้น",
@@ -245,7 +246,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (!formData.trader_sname.match(/^[ก-๙]+$/)) {
+    if (!data.trader_sname.match(/^[ก-๙]+$/)) {
       Swal.fire({
         icon: "error",
         title: "นามสกุลผู้ค้าต้องเป็นภาษาไทยเท่านั้น",
@@ -256,8 +257,8 @@ function ManageTrader() {
       return false;
     }
     if (
-      !formData.trader_tel.match(/^[0-9]+$/) ||
-      formData.trader_tel.length !== 10
+      !data.trader_tel.match(/^[0-9]+$/) ||
+      data.trader_tel.length !== 10
     ) {
       Swal.fire({
         icon: "error",
@@ -268,7 +269,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (formData.trader_business > formData.trader_date) {
+    if (data.trader_business > data.trader_date) {
       Swal.fire({
         icon: "error",
         title: "วันเริ่มทำธุรกิจต้องไม่เกินวันที่สมัคร",
@@ -278,7 +279,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (!formData.trader_un.match(/^[a-zA-Z0-9]+$/)) {
+    if (!data.trader_un.match(/^[a-zA-Z0-9]+$/)) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ใช้ต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
@@ -288,7 +289,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (!formData.trader_pw.match(/^[a-zA-Z0-9]+$/)) {
+    if (!data.trader_pw.match(/^[a-zA-Z0-9]+$/)) {
       Swal.fire({
         icon: "error",
         title: "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น",
@@ -298,7 +299,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (formData.trader_un.length < 6 || formData.trader_pw.length < 6) {
+    if (data.trader_un.length < 6 || data.trader_pw.length < 6) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่ต่ำกว่า 6 ตัวอักษร",
@@ -308,7 +309,7 @@ function ManageTrader() {
       setIsLoading(false);
       return false;
     }
-    if (formData.trader_un.length > 20 || formData.trader_pw.length > 20) {
+    if (data.trader_un.length > 20 || data.trader_pw.length > 20) {
       Swal.fire({
         icon: "error",
         title: "ชื่อผู้ใช้และรหัสผ่านต้องมีความยาวไม่เกิน 20 ตัวอักษร",

@@ -87,13 +87,15 @@ function Sales() {
   };
 
   const handleValidate = () => {
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
-    for (const key in formData) {
-      if (formData[key] === "") {
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
+    for (const key in data) {
+      if (data[key] === "") {
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",
@@ -104,7 +106,7 @@ function Sales() {
       }
     }
 
-    if (formData.sale_amount < 0) {
+    if (data.sale_amount < 0) {
       Swal.fire({
         icon: "error",
         title: "ยอดขายต้องไม่เป็นลบ",
@@ -114,17 +116,7 @@ function Sales() {
       return false;
     }
 
-    if (formData.sale_date > new Date().toISOString().split("T")[0]) {
-      Swal.fire({
-        icon: "error",
-        title: "วันที่ส่งยอดขายต้องไม่เกินวันที่ปัจจุบัน",
-        confirmButtonText: "ตกลง",
-        confirmButtonColor: "#5bc06d",
-      });
-      return false;
-    }
-
-    if (formData.sale_date > new Date().toISOString().split("T")[0]) {
+    if (data.sale_date > new Date().toISOString().split("T")[0]) {
       Swal.fire({
         icon: "error",
         title: "วันที่ส่งยอดขายต้องไม่เกินวันที่ปัจจุบัน",

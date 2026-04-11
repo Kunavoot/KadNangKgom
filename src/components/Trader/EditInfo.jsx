@@ -75,14 +75,16 @@ function EditInfo() {
   };
 
   const handleValidate = () => {
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
 
-    for (const key in formData) {
-      if (formData[key] === "") {
+    for (const key in data) {
+      if (data[key] === "") {
         Swal.fire({
           icon: "error",
           title: "กรุณากรอกข้อมูลให้ครบถ้วน",

@@ -21,8 +21,8 @@ function ManageAgreement() {
   const [agreement_summary, setAgreement_Summary] = useState([]);
   const [agreement_detail, setAgreement_Detail] = useState([]);
   const [agreement_list, setAgreement_List] = useState([]);
-  const [selectedGroupId, setSelectedGroupId] = useState([]);
-  const [selectedStall, setSelectedStall] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+  const [selectedStall, setSelectedStall] = useState(null);
   const [filterDate, setFilterDate] = useState(dayjs().format("YYYY-MM-DD"));
   const sellDays = [
     { id: "1", name: "เสาร์" },
@@ -46,7 +46,10 @@ function ManageAgreement() {
   });
 
   const selectedGroup = useMemo(
-    () => groups.find((group) => group.group_id === selectedGroupId) || null,
+    () =>
+      selectedGroupId
+        ? groups.find((group) => group.group_id === selectedGroupId)
+        : null,
     [groups, selectedGroupId],
   );
 
@@ -62,17 +65,17 @@ function ManageAgreement() {
 
   const handleOpenGroup = (groupId) => {
     setSelectedGroupId(groupId);
-    setSelectedStall([]);
+    setSelectedStall(null);
     setView("group");
   };
 
   const handleCloseGroup = () => {
-    setSelectedGroupId([]);
-    setSelectedStall([]);
+    setSelectedGroupId(null);
+    setSelectedStall(null);
     setGroupFilter({
-      status: "",
-      startDate: "",
-      endDate: "",
+      status: "3",
+      startDate: dayjs().format("YYYY-MM-DD"),
+      endDate: dayjs().add(1, "month").format("YYYY-MM-DD"),
     });
     setAgreement_Detail([]);
     setAgreement_List([]);
@@ -109,7 +112,7 @@ function ManageAgreement() {
   };
 
   const handleBackFromForm = () => {
-    setSelectedStall([]);
+    setSelectedStall(null);
     setView("group");
     return;
   };
@@ -149,7 +152,7 @@ function ManageAgreement() {
     });
   };
 
-  const handleShowGroupData = () => {
+  const handleShowGroupData = async () => {
     try {
       if (
         !selectedGroupId ||
@@ -166,8 +169,10 @@ function ManageAgreement() {
         return;
       }
       setIsLoading(true);
-      getAgreement_Detail();
-      getAgreement_List();
+      await Promise.all([
+        getAgreement_Detail(false),
+        getAgreement_List(false),
+      ]);
     } catch (error) {
       console.error("Error fetching agreement detail:", error);
     } finally {
@@ -176,32 +181,44 @@ function ManageAgreement() {
   };
 
   const handleValidate = () => {
+    const data = {};
     for (const item in formData) {
-      if (typeof formData[item] === "string") {
-        formData[item] = formData[item].trim();
-      }
-    } // ลบช่องว่างหน้าหลัง
-    for (const item in formData) {
-      if (formData[item] === "") {
+      data[item] =
+        typeof formData[item] === "string"
+          ? formData[item].trim()
+          : formData[item];
+    }
+    for (const item in data) {
+      if (data[item] === "") {
         Swal.fire({
           icon: "error",
           title: "กรุณาระบุข้อมูลให้ครบถ้วน",
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
-        return false;
+        return { isValid: false, data: null };
       }
     }
-    return true;
+    if (dayjs(data.agmt_start).isAfter(dayjs(data.agmt_end))) {
+      Swal.fire({
+        icon: "error",
+        title: "วันเริ่มสัญญาต้องไม่เกินวันสิ้นสุดสัญญา",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#5bc06d",
+      });
+      return { isValid: false, data: null };
+    }
+    return { isValid: true, data };
   };
 
   const handleSave = async () => {
-    if (!handleValidate()) return;
+    const { isValid, data: validatedData } = handleValidate();
+    if (!isValid) return;
     setIsLoading(true);
     try {
       const response = await axios.post(
         import.meta.env.VITE_API_URL + "/admin/addAgreement",
-        formData,
+        validatedData,
       );
       Swal.fire({
         icon: "success",
@@ -220,8 +237,10 @@ function ManageAgreement() {
       });
     } finally {
       setIsLoading(false);
-      getAgreement_Detail();
-      getAgreement_List();
+      await Promise.all([
+        getAgreement_Detail(false),
+        getAgreement_List(false),
+      ]);
     }
   };
 
@@ -265,8 +284,10 @@ function ManageAgreement() {
           });
         } finally {
           setIsLoading(false);
-          getAgreement_Detail();
-          getAgreement_List();
+          await Promise.all([
+            getAgreement_Detail(false),
+            getAgreement_List(false),
+          ]);
         }
       }
     });
@@ -326,9 +347,9 @@ function ManageAgreement() {
     }
   };
 
-  const getAgreement_Detail = async () => {
+  const getAgreement_Detail = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const response = await axios.get(
         import.meta.env.VITE_API_URL + "/admin/getAgreement_Detail",
         {
@@ -351,13 +372,13 @@ function ManageAgreement() {
         showConfirmButton: false,
       });
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
   };
 
-  const getAgreement_List = async () => {
+  const getAgreement_List = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const response = await axios.get(
         import.meta.env.VITE_API_URL + "/admin/getAgreement_List",
         {
@@ -380,7 +401,7 @@ function ManageAgreement() {
         showConfirmButton: false,
       });
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
   };
 
