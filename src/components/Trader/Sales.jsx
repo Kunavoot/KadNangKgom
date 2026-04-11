@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import Loading from "../Loading";
-import { BuddhistDatePicker, formatCurrency, toThaiDisplayDate } from "../../utils/utils.jsx";
+import {
+  BuddhistDatePicker,
+  formatCurrency,
+  toThaiDisplayDate,
+} from "../../utils/utils.jsx";
 import { useAuth } from "../../service/AuthContext";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -63,7 +67,7 @@ function Sales() {
       });
     }
   };
-  
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -126,7 +130,7 @@ function Sales() {
       return false;
     }
     return true;
-  }
+  };
 
   const handleSubmit = async () => {
     if (!handleValidate()) return;
@@ -171,10 +175,7 @@ function Sales() {
     }));
   };
 
-
   const getSales = async () => {
-    if (!user || !user.username) return;
-
     setIsLoading(true);
     try {
       const response = await axios.get(
@@ -242,10 +243,8 @@ function Sales() {
   };
 
   useEffect(() => {
-    if (user?.username) {
-      getSales();
-    }
-  }, [user?.username]);
+    getSales();
+  }, []);
 
   return (
     <>
@@ -435,9 +434,15 @@ function Sales() {
                 salesHistory.map((item) => (
                   <tr key={item.row_num} className="hover:bg-gray-100 h-10">
                     <td className="text-center">{item.row_num}</td>
-                    <td className="text-center">{item.sale_id?.toString().padStart(6, "0") || "-"}</td>
-                    <td className="text-center">{toThaiDisplayDate(item.sale_date) || "-"}</td>
-                    <td className="text-center">{formatCurrency(item.sale_amount) || "-"}</td>
+                    <td className="text-center">
+                      {item.sale_id?.toString().padStart(6, "0") || "-"}
+                    </td>
+                    <td className="text-center">
+                      {toThaiDisplayDate(item.sale_date) || "-"}
+                    </td>
+                    <td className="text-center">
+                      {formatCurrency(item.sale_amount) || "-"}
+                    </td>
                     <td className="text-center">{item.sale_best || "-"}</td>
                     <td className="text-center">{item.sale_suggest || "-"}</td>
                     <td className="text-center">
@@ -469,7 +474,7 @@ function Sales() {
       {isModalOpen && selectedSale && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 transition-opacity">
           <div className="bg-white rounded-2xl p-8 w-full max-w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl relative">
-            <button 
+            <button
               type="button"
               className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 focus:outline-none focus:bg-gray-200"
               onClick={() => {
@@ -479,9 +484,9 @@ function Sales() {
             >
               ✕
             </button>
-            
+
             <h3 className="text-2xl font-bold mb-6">รายละเอียดยอดขาย</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2">
               <div>
                 <label className="label py-1">
@@ -493,18 +498,20 @@ function Sales() {
                   disabled
                 />
               </div>
-              
+
               <div>
                 <label className="label py-1">
                   <span className="label-text text-lg">สัญญาเช่า</span>
                 </label>
                 <input
                   className="input input-bordered w-full bg-gray-200 text-black"
-                  value={selectedSale.sale_id?.toString().padStart(6, "0") || "-"}
+                  value={
+                    selectedSale.sale_id?.toString().padStart(6, "0") || "-"
+                  }
                   disabled
                 />
               </div>
-              
+
               <div>
                 <label className="label py-1">
                   <span className="label-text text-lg">วันที่ส่งยอดขาย</span>
@@ -515,7 +522,7 @@ function Sales() {
                   disabled
                 />
               </div>
-              
+
               <div>
                 <label className="label py-1">
                   <span className="label-text text-lg">จำนวนเงิน</span>
@@ -526,7 +533,7 @@ function Sales() {
                   disabled
                 />
               </div>
-              
+
               <div>
                 <label className="label py-1">
                   <span className="label-text text-lg">ประเภทสินค้า</span>
@@ -537,7 +544,7 @@ function Sales() {
                   disabled
                 />
               </div>
-              
+
               <div>
                 <label className="label py-1">
                   <span className="label-text text-lg">กลุ่มสังกัด</span>
@@ -548,18 +555,18 @@ function Sales() {
                   disabled
                 />
               </div>
-              
+
               <div className="md:col-span-2">
                 <label className="label py-1">
                   <span className="label-text text-lg">สินค้าที่ขายดี</span>
                 </label>
                 <input
                   className="input input-bordered w-full bg-gray-200 text-black"
-                  value={selectedSale.sale_best  || "-"}
+                  value={selectedSale.sale_best || "-"}
                   disabled
                 />
               </div>
-              
+
               <div className="md:col-span-2">
                 <label className="label py-1">
                   <span className="label-text text-lg">ข้อเสนอแนะ</span>
