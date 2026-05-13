@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Loading from "../Loading";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 function ManageGroup() {
   // จัดการหน้าเว็บ
   const [isLoading, setIsLoading] = useState(false);
-  const [isForm, setIsFrom] = useState(false);
+  const [isForm, setIsForm] = useState(false);
   const [formType, setFormType] = useState(""); // Add, Edit สำหรับจัดการฟอร์ม
 
   // ข้อมูล
@@ -21,14 +21,14 @@ function ManageGroup() {
 
   const handleEdit = (item) => {
     setFormType("edit");
-    setIsFrom(true);
+    setIsForm(true);
     setSelectedItem(item);
   };
 
   const handleDelete = (group_id) => {
     Swal.fire({
       title: "ยืนยันการลบ",
-      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลผู้บริหารรายนี้?",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลกลุ่มสังกัดนี้?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -49,10 +49,10 @@ function ManageGroup() {
             confirmButtonColor: "#5bc06d",
           });
         } catch (error) {
-          console.error("Error deleting admin:", error);
+          console.error("Error deleting group:", error);
           Swal.fire({
             icon: "error",
-            title: error.response.data.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
+            title: error.response?.data?.message || "เกิดข้อผิดพลาดในการลบข้อมูล",
             confirmButtonText: "ตกลง",
             confirmButtonColor: "#5bc06d",
           });
@@ -66,12 +66,12 @@ function ManageGroup() {
 
   const handleAdd = () => {
     setFormType("add");
-    setIsFrom(true);
+    setIsForm(true);
     setSelectedItem(null);
   };
 
   const handleBackToList = () => {
-    setIsFrom(false);
+    setIsForm(false);
     setFormType("");
     setSelectedItem(null);
   };
@@ -97,10 +97,10 @@ function ManageGroup() {
           confirmButtonColor: "#5bc06d",
         });
       } catch (error) {
-        console.error("Error adding admin:", error);
+        console.error("Error adding group:", error);
         Swal.fire({
           icon: "error",
-          title: error.response.data.message || "เกิดข้อผิดพลาดในการเพิ่มข้อมูล",
+          title: error.response?.data?.message || "เกิดข้อผิดพลาดในการเพิ่มข้อมูล",
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
@@ -121,10 +121,10 @@ function ManageGroup() {
           confirmButtonColor: "#5bc06d",
         });
       } catch (error) {
-        console.error("Error editing admin:", error);
+        console.error("Error editing group:", error);
         Swal.fire({
           icon: "error",
-          title: error.response.data.message || "เกิดข้อผิดพลาดในการแก้ไขข้อมูล",
+          title: error.response?.data?.message || "เกิดข้อผิดพลาดในการแก้ไขข้อมูล",
           confirmButtonText: "ตกลง",
           confirmButtonColor: "#5bc06d",
         });
@@ -208,6 +208,10 @@ function ManageGroup() {
       });
     }
   }, [formType, selectedItem]);
+
+  const uniqueZones = useMemo(() => {
+    return [...new Set(details.map((item) => item.group_zone).filter(Boolean))];
+  }, [details]);
 
   return (
     <>
@@ -327,7 +331,13 @@ function ManageGroup() {
                   value={formData.group_zone || ""}
                   onChange={(e) => handleFormChange(e)}
                   placeholder="กรอกประเภทพื้นที่"
+                  list="zone-options"
                 />
+                <datalist id="zone-options">
+                  {uniqueZones.map((zone, index) => (
+                    <option key={index} value={zone} />
+                  ))}
+                </datalist>
               </div>
               <div>
                 <label className="label">
