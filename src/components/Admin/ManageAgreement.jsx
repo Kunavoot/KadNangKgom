@@ -21,6 +21,7 @@ function ManageAgreement() {
   const [agreement_summary, setAgreement_Summary] = useState([]);
   const [agreement_detail, setAgreement_Detail] = useState([]);
   const [agreement_list, setAgreement_List] = useState([]);
+  const [traders, setTraders] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [selectedStall, setSelectedStall] = useState(null);
   const [filterDate, setFilterDate] = useState(dayjs().format("YYYY-MM-DD"));
@@ -34,6 +35,7 @@ function ManageAgreement() {
     group_id: "",
     group_name: "",
     agmt_trader: "",
+    agmt_trader_name: "",
     agmt_admin: "",
     agmt_status: "",
     agmt_start: "",
@@ -103,6 +105,7 @@ function ManageAgreement() {
       group_id: group?.group_id || "",
       group_name: group?.group_name || "",
       agmt_trader: "",
+      agmt_trader_name: "",
       agmt_admin: user?.id || "",
       agmt_status: filter?.status || "",
       agmt_start: filter?.startDate || "",
@@ -120,6 +123,26 @@ function ManageAgreement() {
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTraderChange = (e) => {
+    const value = e.target.value;
+    const trader = traders.find((t) => t.trader_no === value);
+    setFormData((prev) => ({
+      ...prev,
+      agmt_trader: value,
+      agmt_trader_name: trader ? `${trader.trader_pname}${trader.trader_name} ${trader.trader_sname}` : prev.agmt_trader_name,
+    }));
+  };
+
+  const handleTraderNameChange = (e) => {
+    const value = e.target.value;
+    const trader = traders.find((t) => `${t.trader_pname}${t.trader_name} ${t.trader_sname}` === value);
+    setFormData((prev) => ({
+      ...prev,
+      agmt_trader_name: value,
+      agmt_trader: trader ? trader.trader_no : prev.agmt_trader,
+    }));
   };
 
   const handleDateChange = (name, value) => {
@@ -320,6 +343,17 @@ function ManageAgreement() {
     }
   };
 
+  const getTraders = async () => {
+    try {
+      const response = await axios.get(
+        import.meta.env.VITE_API_URL + "/admin/getTrader"
+      );
+      setTraders(response.data.data);
+    } catch (error) {
+      console.error("Error fetching traders:", error);
+    }
+  };
+
   const getAgreement_Summary = async () => {
     try {
       setIsLoading(true);
@@ -407,6 +441,7 @@ function ManageAgreement() {
 
   useEffect(() => {
     getGroup();
+    getTraders();
   }, []);
 
   useEffect(() => {
@@ -663,17 +698,43 @@ function ManageAgreement() {
                     disabled
                   />
                 </div>
-                <div>
-                  <label className="label">
-                    <span className="label-text text-lg">รหัสผู้เช่า</span>
-                  </label>
-                  <input
-                    className="input input-bordered w-full h-12"
-                    name="agmt_trader"
-                    value={formData.agmt_trader}
-                    onChange={handleFormChange}
-                    placeholder="กรอกรหัสผู้เช่า"
-                  />
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <label className="label">
+                      <span className="label-text text-lg">รหัสผู้เช่า</span>
+                    </label>
+                    <input
+                      className="input input-bordered w-full h-12"
+                      name="agmt_trader"
+                      value={formData.agmt_trader}
+                      onChange={handleTraderChange}
+                      placeholder="กรอกรหัสผู้เช่า"
+                      list="trader-id-list"
+                    />
+                    <datalist id="trader-id-list">
+                      {traders.map((trader) => (
+                        <option key={trader.trader_no} value={trader.trader_no} />
+                      ))}
+                    </datalist>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="label">
+                      <span className="label-text text-lg">ชื่อผู้เช่า</span>
+                    </label>
+                    <input
+                      className="input input-bordered w-full h-12"
+                      name="agmt_trader_name"
+                      value={formData.agmt_trader_name}
+                      onChange={handleTraderNameChange}
+                      placeholder="กรอกชื่อผู้เช่า"
+                      list="trader-name-list"
+                    />
+                    <datalist id="trader-name-list">
+                      {traders.map((trader) => (
+                        <option key={`name-${trader.trader_no}`} value={`${trader.trader_pname}${trader.trader_name} ${trader.trader_sname}`} />
+                      ))}
+                    </datalist>
+                  </div>
                 </div>
               </div>
 
@@ -725,11 +786,12 @@ function ManageAgreement() {
                   <span className="label-text text-lg">รหัสผู้บริหาร</span>
                 </label>
                 <input
-                  className="input input-bordered w-full h-12"
+                  className="input input-bordered w-full h-12 bg-gray-200"
                   name="agmt_admin"
                   value={formData.agmt_admin}
                   onChange={handleFormChange}
                   placeholder="กรอกรหัสผู้บริหาร"
+                  disabled
                 />
               </div>
             </div>
