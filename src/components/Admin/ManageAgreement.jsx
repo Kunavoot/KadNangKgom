@@ -131,7 +131,7 @@ function ManageAgreement() {
     setFormData((prev) => ({
       ...prev,
       agmt_trader: value,
-      agmt_trader_name: trader ? `${trader.trader_pname}${trader.trader_name} ${trader.trader_sname}` : prev.agmt_trader_name,
+      agmt_trader_name: trader ? `${trader.trader_pname}${trader.trader_name} ${trader.trader_sname}` : "",
     }));
   };
 
@@ -141,7 +141,7 @@ function ManageAgreement() {
     setFormData((prev) => ({
       ...prev,
       agmt_trader_name: value,
-      agmt_trader: trader ? trader.trader_no : prev.agmt_trader,
+      agmt_trader: trader ? trader.trader_no : "",
     }));
   };
 
